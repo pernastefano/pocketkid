@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% block title %}{{ _('setup_title') }} - {{ _('app_name') }}{% endblock %}
+{% block content %}
+<section class="card card-auth">
+  <h2>{{ _('setup_title') }}</h2>
+  <p class="muted">{{ _('setup_subtitle') }}</p>
+
+  <form method="post" class="stack">
+    <label>{{ _('username') }} ({{ _('role_parent') }})
+      <input name="parent_username" required>
+    </label>
+    <label>{{ _('password') }} ({{ _('role_parent') }})
+      <input type="password" name="parent_password" minlength="4" required>
+    </label>
+    <label>{{ _('preferred_language') }} ({{ _('role_parent') }})
+      <select name="parent_language">
+        <option value="en">{{ _('lang_en') }}</option>
+        <option value="it">{{ _('lang_it') }}</option>
+      </select>
+    </label>
+
+    <label class="checkbox-label">
+      <input type="checkbox" name="create_first_child" value="1"> {{ _('create_first_child') }}
+    </label>
+
+    <label>{{ _('username') }} ({{ _('role_child') }})
+      <input name="child_username">
+    </label>
+    <label>{{ _('password') }} ({{ _('role_child') }})
+      <input type="password" name="child_password" minlength="4">
+    </label>
+    <label>{{ _('initial_balance') }} ({{ _('role_child') }})
+      <input type="number" name="child_balance" min="0" step="0.01" value="0.00">
+    </label>
+    <label>{{ _('preferred_language') }} ({{ _('role_child') }})
+      <select name="child_language">
+        <option value="en">{{ _('lang_en') }}</option>
+        <option value="it">{{ _('lang_it') }}</option>
+      </select>
+    </label>
+
+    <button class="btn" type="submit">{{ _('setup_title') }}</button>
+  </form>
+</section>
+{% endblock %}

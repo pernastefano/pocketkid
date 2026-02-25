@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+{% block title %}{{ _('dashboard_child') }} - {{ _('app_name') }}{% endblock %}
+{% block content %}
+<section class="card balance-card">
+  <p class="muted">{{ _('available_balance') }}</p>
+  <p class="balance">{{ wallet.balance|eur }}</p>
+</section>
+
+<section class="card">
+  <h2>{{ _('requests_label') }}</h2>
+  <div class="icon-actions" data-request-toggle-group="true">
+    <button class="btn btn-secondary icon-action" type="button" data-request-toggle="reward" title="{{ _('request_reward') }}">🏆</button>
+    <button class="btn btn-secondary icon-action" type="button" data-request-toggle="withdrawal" title="{{ _('request_withdrawal') }}">💸</button>
+    <button class="btn btn-secondary icon-action" type="button" data-request-toggle="deposit" title="{{ _('request_deposit') }}">➕</button>
+  </div>
+</section>
+
+<section class="card hidden" data-request-form="reward">
+  <h2>{{ _('request_reward') }}</h2>
+  <form method="post" action="{{ url_for('child_request_reward') }}" class="stack">
+    <label>{{ _('completed_challenge_label') }}
+      <select name="challenge_id" required>
+        {% for challenge in challenges %}
+          <option value="{{ challenge.id }}">{{ challenge.name }} · {{ challenge.amount|eur }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label>{{ _('note') }}
+      <input name="description">
+    </label>
+    <button class="btn" type="submit">{{ _('send_reward_request') }}</button>
+  </form>
+</section>
+
+<section class="card hidden" data-request-form="withdrawal">
+  <h2>{{ _('request_withdrawal') }}</h2>
+  <form method="post" action="{{ url_for('child_request_withdrawal') }}" class="stack">
+    <label>{{ _('amount') }}
+      <input type="number" step="0.01" min="0.01" name="amount" required>
+    </label>
+    <label>{{ _('reason') }}
+      <input name="description">
+    </label>
+    <button class="btn" type="submit">{{ _('send_withdrawal_request') }}</button>
+  </form>
+</section>
+
+<section class="card hidden" data-request-form="deposit">
+  <h2>{{ _('request_deposit') }}</h2>
+  <form method="post" action="{{ url_for('child_request_deposit') }}" class="stack">
+    <label>{{ _('amount') }}
+      <input type="number" step="0.01" min="0.01" name="amount" required>
+    </label>
+    <label>{{ _('description') }}
+      <input name="description">
+    </label>
+    <button class="btn" type="submit">{{ _('send_deposit_request') }}</button>
+  </form>
+</section>
+
+<section class="card">
+  <h2>{{ _('requests_status') }}</h2>
+  <div class="list">
+    {% for req in requests %}
+      <div class="list-item request-item">
+        <p class="label request-kind">{{ _('request_type_reward') if req.request_type == 'reward' else (_('request_type_withdrawal') if req.request_type == 'withdrawal' else _('request_type_deposit')) }}</p>
+        <p class="badge {{ req.status }} request-status">{{ req.status }}</p>
+        <p class="muted request-description">{{ req.description }}</p>
+        <p class="muted request-time">{{ req.created_at.strftime('%d/%m/%Y %H:%M') }}</p>
+        <p class="amount request-amount {{ 'positive' if req.request_type in ['reward', 'deposit'] else 'negative' }}">{{ req.amount|eur }}</p>
+      </div>
+    {% else %}
+      <p class="muted">{{ _('no_requests') }}</p>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="card">
+  <h2>{{ _('history') }}</h2>
+  <div class="list">
+    {% for tx in transactions %}
+      <div class="list-item">
+        <div>
+          <p class="label">{{ tx.description }}</p>
+          <p class="muted">{{ tx.created_at.strftime('%d/%m/%Y %H:%M') }}</p>
+        </div>
+        <p class="amount {{ 'positive' if tx.amount >= 0 else 'negative' }}">{{ tx.amount|eur }}</p>
+      </div>
+    {% else %}
+      <p class="muted">{{ _('no_operations') }}</p>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

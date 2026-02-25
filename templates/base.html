@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="{{ current_locale }}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0a2748">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="{{ _('app_name') }}">
+  <link rel="manifest" href="{{ url_for('static', filename='manifest.webmanifest') }}">
+  <link rel="apple-touch-icon" href="{{ url_for('static', filename='icons/logo-192.png') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+  <title>{% block title %}{{ _('app_name') }}{% endblock %}</title>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="brand-wrap">
+        <img class="brand-logo" src="{{ url_for('static', filename='icons/logo.svg') }}" alt="PocketKid logo">
+        <div>
+          <h1>{{ _('app_name') }}</h1>
+        </div>
+      </div>
+      <div class="topbar-actions">
+        {% if user %}
+        <a class="btn btn-secondary icon-btn" href="{{ url_for('settings') }}" aria-label="{{ _('settings') }}" title="{{ _('settings') }}">
+          <span aria-hidden="true">⚙</span>
+        </a>
+        <button id="notify-toggle" class="btn btn-secondary icon-btn" type="button" aria-label="{{ _('notifications') }}" title="{{ _('notifications') }}">
+          <span aria-hidden="true">✉</span>
+          <span id="notify-badge" class="notify-badge hidden">0</span>
+        </button>
+        <a class="btn btn-secondary" href="{{ url_for('logout') }}">{{ _('logout') }}</a>
+        {% endif %}
+      </div>
+    </header>
+
+    {% if user %}
+    <section class="welcome-row">
+      <p class="welcome-text">{{ _('welcome_user', username=user.username) }}</p>
+    </section>
+    {% endif %}
+
+    {% if user %}
+    <section id="notify-panel" class="card notify-panel hidden">
+      <h2>{{ _('notifications') }}</h2>
+      <div id="notify-empty" class="muted">{{ _('no_new_notifications') }}</div>
+      <div id="notify-list" class="list"></div>
+    </section>
+    {% endif %}
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+      <section class="alerts">
+        {% for category, message in messages %}
+          <div class="alert {{ category }}">{{ message }}</div>
+        {% endfor %}
+      </section>
+      {% endif %}
+    {% endwith %}
+
+    <main>
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+
+  <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>

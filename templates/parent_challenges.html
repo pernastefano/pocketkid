@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% block title %}{{ _('challenge_settings') }} - {{ _('app_name') }}{% endblock %}
+{% block content %}
+<nav class="actions-row">
+  <a class="btn btn-secondary" href="{{ url_for('dashboard') }}">{{ _('back_dashboard') }}</a>
+</nav>
+
+<section class="card">
+  <h2>{{ _('new_challenge') }}</h2>
+  <form method="post" class="stack">
+    <label>{{ _('challenge_name') }}
+      <input name="name" required>
+    </label>
+    <label>{{ _('default_reward') }}
+      <input type="number" name="amount" step="0.01" min="0.01" required>
+    </label>
+    <button class="btn" type="submit">{{ _('add_challenge') }}</button>
+  </form>
+</section>
+
+<section class="card">
+  <h2>{{ _('configured_challenges') }}</h2>
+  <div class="list">
+    {% for challenge in challenges %}
+      <div class="list-item">
+        <div>
+          <p class="label">{{ challenge.name }}</p>
+          <p class="muted">{{ challenge.created_at.strftime('%d/%m/%Y') }}</p>
+        </div>
+        <p class="amount {{ 'positive' if challenge.amount >= 0 else 'negative' }}">{{ challenge.amount|eur }}</p>
+        <div class="inline-actions">
+          <form method="post" action="{{ url_for('toggle_challenge', challenge_id=challenge.id) }}">
+            <button class="btn btn-secondary" type="submit">{{ _('deactivate') if challenge.active else _('activate') }}</button>
+          </form>
+        </div>
+      </div>
+    {% else %}
+      <p class="muted">{{ _('no_challenges') }}</p>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

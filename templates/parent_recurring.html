@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+{% block title %}{{ _('recurring_management') }} - {{ _('app_name') }}{% endblock %}
+{% block content %}
+<nav class="actions-row">
+  <a class="btn btn-secondary" href="{{ url_for('dashboard') }}">{{ _('back_dashboard') }}</a>
+</nav>
+
+<section class="card">
+  <h2>{{ _('new_recurring') }}</h2>
+  <form method="post" class="stack" data-deposit-mode-form="true">
+    <label>{{ _('role_child') }}
+      <select name="child_id" required>
+        {% for child in children %}
+          <option value="{{ child.id }}">{{ child.username }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label>{{ _('movement_type') }}
+      <select name="movement" required>
+        <option value="deposit">{{ _('deposit') }}</option>
+        <option value="withdraw">{{ _('withdraw') }}</option>
+      </select>
+    </label>
+    <label data-deposit-only="true">{{ _('deposit_mode') }}
+      <select name="deposit_mode">
+        <option value="free">{{ _('deposit_mode_free') }}</option>
+        <option value="challenge">{{ _('deposit_mode_challenge') }}</option>
+      </select>
+    </label>
+    <label data-challenge-field="true">{{ _('challenge') }}
+      <select name="challenge_id">
+        <option value="">-</option>
+        {% for challenge in challenges %}
+          <option value="{{ challenge.id }}">{{ challenge.name }} · {{ challenge.amount|eur }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label>{{ _('amount') }}
+      <input type="number" step="0.01" min="0.01" name="amount" required>
+    </label>
+    <label>{{ _('frequency') }}
+      <select name="frequency" required>
+        <option value="daily">{{ _('daily') }}</option>
+        <option value="weekly">{{ _('weekly') }}</option>
+        <option value="biweekly">{{ _('biweekly') }}</option>
+        <option value="monthly">{{ _('monthly') }}</option>
+      </select>
+    </label>
+    <label>{{ _('start_date') }}
+      <input type="date" name="start_date">
+    </label>
+    <label>{{ _('description') }}
+      <input name="description">
+    </label>
+    <button class="btn" type="submit">{{ _('create_recurring') }}</button>
+  </form>
+</section>
+
+<section class="card">
+  <h2>{{ _('configured_recurring') }}</h2>
+  <div class="list">
+    {% for item in recurring %}
+      <div class="list-item block">
+        <div>
+          <p class="label">{{ item.child.username }} · {{ _('deposit') if item.movement == 'deposit' else _('withdraw') }} · {{ item.amount|eur }}</p>
+          <p class="muted">{{ item.description }}</p>
+          <p class="muted">{{ _('next_run') }}: {{ item.next_run_at.strftime('%d/%m/%Y') }}</p>
+        </div>
+        <form method="post" action="{{ url_for('toggle_recurring', item_id=item.id) }}">
+          <button class="btn btn-secondary" type="submit">{{ _('deactivate') if item.active else _('activate') }}</button>
+        </form>
+      </div>
+    {% else %}
+      <p class="muted">-</p>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

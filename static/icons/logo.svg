@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="PocketKid logo">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0a2748"/>
+      <stop offset="100%" stop-color="#124c8a"/>
+    </linearGradient>
+  </defs>
+  <rect x="24" y="24" width="464" height="464" rx="110" fill="url(#g)"/>
+  <circle cx="256" cy="210" r="86" fill="#e8eef7"/>
+  <path d="M170 330h172c18 0 32 14 32 32v26H138v-26c0-18 14-32 32-32z" fill="#e8eef7"/>
+  <text x="256" y="232" text-anchor="middle" font-size="86" font-family="Inter, Arial, sans-serif" font-weight="700" fill="#0a2748">₽</text>
+</svg>

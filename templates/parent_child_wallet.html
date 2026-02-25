@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+{% block title %}{{ _('child_wallet', child=child.username) }} - {{ _('app_name') }}{% endblock %}
+{% block content %}
+<nav class="actions-row">
+  <a class="btn btn-secondary" href="{{ url_for('dashboard') }}">{{ _('back_dashboard') }}</a>
+</nav>
+
+<section class="card balance-card">
+  <p class="muted">{{ _('child_wallet', child=child.username) }}</p>
+  <p class="balance">{{ wallet.balance|eur }}</p>
+</section>
+
+<section class="card">
+  <h2>{{ _('manual_parent_movement_title') }}</h2>
+  <form method="post" action="{{ url_for('parent_manual_movement', child_id=child.id) }}" class="stack" data-deposit-mode-form="true">
+    <label>{{ _('movement_type') }}
+      <select name="movement" required>
+        <option value="deposit">{{ _('deposit') }}</option>
+        <option value="withdraw">{{ _('withdraw') }}</option>
+      </select>
+    </label>
+    <label data-deposit-only="true">{{ _('deposit_mode') }}
+      <select name="deposit_mode">
+        <option value="free">{{ _('deposit_mode_free') }}</option>
+        <option value="challenge">{{ _('deposit_mode_challenge') }}</option>
+      </select>
+    </label>
+    <label data-challenge-field="true">{{ _('challenge') }}
+      <select name="challenge_id">
+        <option value="">-</option>
+        {% for challenge in challenges %}
+        <option value="{{ challenge.id }}">{{ challenge.name }} · {{ challenge.amount|eur }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label>{{ _('amount') }}
+      <input type="number" step="0.01" min="0.01" name="amount" required>
+    </label>
+    <label>{{ _('description') }}
+      <input name="description">
+    </label>
+    <button class="btn" type="submit">{{ _('save_movement') }}</button>
+  </form>
+</section>
+
+<section class="card">
+  <h2>{{ _('history') }}</h2>
+  <div class="list">
+    {% for tx in transactions %}
+      <div class="list-item">
+        <div>
+          <p class="label">{{ tx.description }}</p>
+          <p class="muted">{{ tx.created_at.strftime('%d/%m/%Y %H:%M') }}</p>
+        </div>
+        <p class="amount {{ 'positive' if tx.amount >= 0 else 'negative' }}">{{ tx.amount|eur }}</p>
+      </div>
+    {% else %}
+      <p class="muted">{{ _('no_operations') }}</p>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="card">
+  <h2>{{ _('reset_child_password') }}</h2>
+  <form method="post" action="{{ url_for('parent_reset_child_password', child_id=child.id) }}" class="stack">
+    <label>{{ _('new_password') }}
+      <input type="password" name="new_password" minlength="4" required>
+    </label>
+    <button class="btn" type="submit">{{ _('reset_password') }}</button>
+  </form>
+</section>
+{% endblock %}

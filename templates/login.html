@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block title %}{{ _('login_title') }} - {{ _('app_name') }}{% endblock %}
+{% block content %}
+<section class="card card-auth">
+  <h2>{{ _('login_title') }}</h2>
+  <p class="muted">{{ _('family_wallet') }}</p>
+  <form method="post" class="stack">
+    <label>{{ _('username') }}
+      <input name="username" required autocomplete="username">
+    </label>
+    <label>{{ _('password') }}
+      <input type="password" name="password" required autocomplete="current-password">
+    </label>
+    <button class="btn" type="submit">{{ _('sign_in') }}</button>
+  </form>
+</section>
+{% endblock %}

@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% block title %}{{ _('parents_management') }} - {{ _('app_name') }}{% endblock %}
+{% block content %}
+<nav class="actions-row">
+  <a class="btn btn-secondary" href="{{ url_for('dashboard') }}">{{ _('back_dashboard') }}</a>
+</nav>
+
+<section class="card">
+  <h2>{{ _('add_parent') }}</h2>
+  <form method="post" class="stack">
+    <label>{{ _('username') }}
+      <input name="username" required>
+    </label>
+    <label>{{ _('initial_password') }}
+      <input type="password" name="password" minlength="4" required>
+    </label>
+    <label>{{ _('preferred_language') }}
+      <select name="preferred_language">
+        <option value="en">{{ _('lang_en') }}</option>
+        <option value="it">{{ _('lang_it') }}</option>
+      </select>
+    </label>
+    <button class="btn" type="submit">{{ _('create_parent') }}</button>
+  </form>
+</section>
+
+<section class="card">
+  <h2>{{ _('registered_parents') }}</h2>
+  <div class="list">
+    {% for parent in parents %}
+      <div class="list-item">
+        <div>
+          <p class="label">{{ parent.username }}</p>
+          <p class="muted">{{ _('preferred_language') }}: {{ parent.preferred_language or 'en' }}</p>
+        </div>
+        <form method="post" action="{{ url_for('delete_parent', parent_id=parent.id) }}" data-double-confirm="true" data-confirm-first="{{ _('confirm_delete_1') }}" data-confirm-second="{{ _('confirm_delete_2') }}">
+          <input type="hidden" name="double_confirmed" value="0">
+          <button class="btn btn-secondary" type="submit" {% if parents|length <= 1 %}disabled{% endif %}>{{ _('delete_parent') }}</button>
+        </form>
+      </div>
+    {% else %}
+      <p class="muted">-</p>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

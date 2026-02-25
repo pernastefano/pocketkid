@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% block title %}{{ _('settings_title') }} - {{ _('app_name') }}{% endblock %}
+{% block content %}
+<nav class="actions-row">
+  <a class="btn btn-secondary" href="{{ url_for('dashboard') }}">{{ _('back_dashboard') }}</a>
+</nav>
+
+<section class="card">
+  <h2>{{ _('language_settings') }}</h2>
+  <form method="post" class="stack">
+    <input type="hidden" name="action" value="language">
+    <label>{{ _('preferred_language') }}
+      <select name="preferred_language">
+        <option value="en" {% if user.preferred_language == 'en' %}selected{% endif %}>{{ _('lang_en') }}</option>
+        <option value="it" {% if user.preferred_language == 'it' %}selected{% endif %}>{{ _('lang_it') }}</option>
+      </select>
+    </label>
+    <button class="btn" type="submit">{{ _('save_language') }}</button>
+  </form>
+</section>
+
+<section class="card">
+  <h2>{{ _('change_password') }}</h2>
+  <form method="post" class="stack">
+    <input type="hidden" name="action" value="password">
+    <label>{{ _('current_password') }}
+      <input type="password" name="current_password" required>
+    </label>
+    <label>{{ _('new_password') }}
+      <input type="password" name="new_password" minlength="4" required>
+    </label>
+    <button class="btn" type="submit">{{ _('save_password') }}</button>
+  </form>
+</section>
+{% endblock %}

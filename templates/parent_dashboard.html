@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% block title %}{{ _('dashboard_parent') }} - {{ _('app_name') }}{% endblock %}
+{% block content %}
+<nav class="actions-row">
+  <a class="btn" href="{{ url_for('parent_children') }}">{{ _('manage_children') }}</a>
+  <a class="btn" href="{{ url_for('parent_parents') }}">{{ _('manage_parents') }}</a>
+  <a class="btn" href="{{ url_for('parent_recurring') }}">{{ _('manage_recurring') }}</a>
+  <a class="btn" href="{{ url_for('parent_challenges') }}">{{ _('manage_challenges') }}</a>
+</nav>
+
+<section class="card">
+  <h2>{{ _('children_wallets') }}</h2>
+  <div class="list">
+    {% for row in child_rows %}
+      <a class="list-item" href="{{ url_for('parent_child_wallet', child_id=row.child.id) }}">
+        <div>
+          <p class="label">{{ row.child.username }}</p>
+          <p class="muted">{{ _('pending_count', count=row.pending_count) }}</p>
+        </div>
+        <p class="amount positive">{{ row.wallet.balance|eur }}</p>
+      </a>
+    {% else %}
+      <p class="muted">{{ _('no_children') }}</p>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="card">
+  <h2>{{ _('pending_requests') }}</h2>
+  <div class="list">
+    {% for req in pending_requests %}
+      <div class="list-item request-item parent-request-item">
+        <p class="label request-kind">{{ req.child.username }} · {{ _('request_type_reward') if req.request_type == 'reward' else (_('request_type_withdrawal') if req.request_type == 'withdrawal' else _('request_type_deposit')) }}</p>
+        <p class="badge pending request-status">{{ req.status }}</p>
+        <p class="muted request-description">{{ req.description }}</p>
+        <p class="muted request-time">{{ req.created_at.strftime('%d/%m/%Y %H:%M') }}</p>
+        <p class="amount request-amount {{ 'positive' if req.request_type in ['reward', 'deposit'] else 'negative' }}">{{ req.amount|eur }}</p>
+        <div class="inline-actions parent-request-actions">
+          <form method="post" action="{{ url_for('parent_decide_request', request_id=req.id) }}">
+            <input type="hidden" name="decision" value="approve">
+            <button class="btn" type="submit">{{ _('approve') }}</button>
+          </form>
+          <form method="post" action="{{ url_for('parent_decide_request', request_id=req.id) }}">
+            <input type="hidden" name="decision" value="reject">
+            <button class="btn btn-secondary" type="submit">{{ _('reject') }}</button>
+          </form>
+        </div>
+      </div>
+    {% else %}
+      <p class="muted">{{ _('no_pending_requests') }}</p>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

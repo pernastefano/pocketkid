@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+{% block title %}{{ _('manage_children') }} - {{ _('app_name') }}{% endblock %}
+{% block content %}
+<nav class="actions-row">
+  <a class="btn btn-secondary" href="{{ url_for('dashboard') }}">{{ _('back_dashboard') }}</a>
+</nav>
+
+<section class="card">
+  <h2>{{ _('add_child') }}</h2>
+  <form method="post" class="stack">
+    <label>{{ _('username') }}
+      <input name="username" required>
+    </label>
+    <label>{{ _('initial_password') }}
+      <input type="password" name="password" minlength="4" required>
+    </label>
+    <label>{{ _('initial_balance') }}
+      <input type="number" name="initial_balance" min="0" step="0.01" value="0.00">
+    </label>
+    <label>{{ _('preferred_language') }}
+      <select name="preferred_language">
+        <option value="en">{{ _('lang_en') }}</option>
+        <option value="it">{{ _('lang_it') }}</option>
+      </select>
+    </label>
+    <button class="btn" type="submit">{{ _('create_child') }}</button>
+  </form>
+</section>
+
+<section class="card">
+  <h2>{{ _('registered_children') }}</h2>
+  <div class="list">
+    {% for row in child_rows %}
+      <div class="list-item child-card-item">
+        <a class="child-card-main" href="{{ url_for('parent_child_wallet', child_id=row.child.id) }}">
+          <p class="label child-card-name">{{ row.child.username }}</p>
+          <p class="amount positive child-card-wallet">{{ row.wallet.balance|eur }}</p>
+        </a>
+        <form method="post" class="child-card-delete" action="{{ url_for('delete_child', child_id=row.child.id) }}" data-double-confirm="true" data-confirm-first="{{ _('confirm_delete_1') }}" data-confirm-second="{{ _('confirm_delete_2') }}">
+          <input type="hidden" name="double_confirmed" value="0">
+          <button class="btn btn-secondary" type="submit">{{ _('delete_child') }}</button>
+        </form>
+      </div>
+    {% else %}
+      <p class="muted">{{ _('no_children') }}</p>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}
