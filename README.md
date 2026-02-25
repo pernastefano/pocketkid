@@ -21,6 +21,7 @@ PocketKid uses a simple, production-friendly stack:
   - Server-side rendered pages
   - Session-based authentication
   - Role-based access (parent/child)
+  - Production container runtime via Gunicorn
 - **Database**: SQLite (local file under `data/`)
 - **ORM**: Flask-SQLAlchemy
 - **Frontend**:
@@ -101,16 +102,20 @@ Prepare env file first:
 ```bash
 cp .env.example .env
 # edit .env with real VAPID keys
+# optional: set host user/group for container process
+# PUID=1000
+# PGID=1000
 ```
 
 ```bash
-docker compose up -d
+docker compose up -d --build
 ```
 
 The default compose file:
 - maps port `8000`
 - persists app data in `./data`
 - restarts container automatically (`unless-stopped`)
+- supports optional `PUID`/`PGID` to run the container as a specific host UID/GID (default `1000:1000`)
 
 ---
 
@@ -173,7 +178,7 @@ Use a reverse proxy with TLS termination (Nginx/Caddy/Traefik) in front of the F
 
 Example architecture:
 - `https://your-domain` → reverse proxy (TLS certificate)
-- proxy forwards to PocketKid app on internal port `8000`
+- proxy forwards to PocketKid (Gunicorn) on internal port `8000`
 
 ## VAPID keys (environment-based)
 PocketKid reads VAPID keys from environment variables:

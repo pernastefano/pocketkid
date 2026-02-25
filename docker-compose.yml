@@ -1,10 +1,15 @@
 services:
   pocketkid:
+    build:
+      context: .
     image: ghcr.io/pernastefano/pocketkid:latest
     container_name: pocketkid
+    user: "${PUID:-1000}:${PGID:-1000}"
     env_file:
       - .env
     environment:
+      - PUID=${PUID:-1000}
+      - PGID=${PGID:-1000}
       - VAPID_PUBLIC_KEY=${VAPID_PUBLIC_KEY}
       - VAPID_PRIVATE_KEY=${VAPID_PRIVATE_KEY}
       - VAPID_PRIVATE_KEY_B64=${VAPID_PRIVATE_KEY_B64}

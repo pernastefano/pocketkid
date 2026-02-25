@@ -12,4 +12,4 @@ COPY . .
 
 EXPOSE 8000
 
-CMD ["python", "app.py"]
+CMD ["gunicorn", "--workers", "2", "--bind", "0.0.0.0:8000", "--access-logfile", "-", "--error-logfile", "-", "wsgi:app"]
