@@ -1,15 +1,25 @@
 # 1. PocketKid
 
-PocketKid is a mobile-first Python PWA for family virtual wallet management.
+PocketKid is a mobile-first Python PWA to manage a virtual wallet for your children.
+It helps parents organize pocket money through configurable challenges and a complete request approval flow.
 
 Public repository:
 - https://github.com/pernastefano/pocketkid
 
 Parents and children access the same app with role-based features:
-- Children can request rewards (from configured challenges), withdrawals, and generic deposits.
+- Children can submit reward requests linked to challenges, plus withdrawal and generic deposit requests.
 - Parents can approve/reject requests, perform manual wallet movements, configure recurring movements, manage users, and review full history.
 
 The app is installable as a Progressive Web App (PWA) and supports real Web Push notifications (VAPID) for system-level alerts.
+
+## Screens
+
+![Parent Dashboard](screens/parent-dashboard.png)
+![Challenge Configuration](screens/challenge-config.png)
+![Parent Deposit](screens/parent-deposit.png)
+![Recurring Configuration](screens/recurring-config.png)
+![Child Dashboard](screens/child-dashboard.png)
+
 
 ---
 

@@ -1,12 +1,40 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="PocketKid logo">
   <defs>
-    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#0a2748"/>
-      <stop offset="100%" stop-color="#124c8a"/>
+    <linearGradient id="bg" x1="72" y1="56" x2="456" y2="456" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#0a2748"/>
+      <stop offset="1" stop-color="#124c8a"/>
+    </linearGradient>
+    <linearGradient id="wallet" x1="132" y1="176" x2="364" y2="356" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#f8fbff"/>
+      <stop offset="1" stop-color="#dbe7f6"/>
+    </linearGradient>
+    <linearGradient id="card" x1="210" y1="132" x2="332" y2="244" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#e9f2ff"/>
+    </linearGradient>
+    <linearGradient id="badge" x1="314" y1="292" x2="386" y2="366" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#5fd39a"/>
+      <stop offset="1" stop-color="#32b67e"/>
     </linearGradient>
   </defs>
-  <rect x="24" y="24" width="464" height="464" rx="110" fill="url(#g)"/>
-  <circle cx="256" cy="210" r="86" fill="#e8eef7"/>
-  <path d="M170 330h172c18 0 32 14 32 32v26H138v-26c0-18 14-32 32-32z" fill="#e8eef7"/>
-  <text x="256" y="232" text-anchor="middle" font-size="86" font-family="Inter, Arial, sans-serif" font-weight="700" fill="#0a2748">₽</text>
+
+  <rect x="24" y="24" width="464" height="464" rx="112" fill="url(#bg)"/>
+
+  <g transform="rotate(-8 256 256)">
+    <rect x="202" y="126" width="132" height="90" rx="18" fill="url(#card)"/>
+    <rect x="202" y="147" width="132" height="18" rx="7" fill="#c8daef"/>
+    <rect x="216" y="178" width="56" height="9" rx="4.5" fill="#9db8d7"/>
+  </g>
+
+  <g>
+    <rect x="118" y="192" width="276" height="196" rx="42" fill="url(#wallet)"/>
+    <rect x="118" y="228" width="276" height="44" rx="14" fill="#2a537e" opacity="0.9"/>
+    <path d="M154 322h124" stroke="#b8cde6" stroke-width="13" stroke-linecap="round"/>
+    <path d="M154 350h88" stroke="#cadcf0" stroke-width="11" stroke-linecap="round"/>
+  </g>
+
+  <g>
+    <circle cx="348" cy="328" r="40" fill="url(#badge)"/>
+    <path d="M330 328l12 12 25-25" fill="none" stroke="#ffffff" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
 </svg>
