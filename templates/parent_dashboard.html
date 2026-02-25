@@ -14,7 +14,7 @@
     {% for row in child_rows %}
       <a class="list-item" href="{{ url_for('parent_child_wallet', child_id=row.child.id) }}">
         <div>
-          <p class="label">{{ row.child.username }}</p>
+          <p class="label">{{ row.child.username|name_cap }}</p>
           <p class="muted">{{ _('pending_count', count=row.pending_count) }}</p>
         </div>
         <p class="amount positive">{{ row.wallet.balance|eur }}</p>
@@ -45,7 +45,7 @@
   <div class="list">
     {% for req in pending_requests %}
       <div class="list-item request-item parent-request-item">
-        <p class="label request-kind">{{ req.child.username }} · {{ _('request_type_reward') if req.request_type == 'reward' else (_('request_type_withdrawal') if req.request_type == 'withdrawal' else _('request_type_deposit')) }}</p>
+        <p class="label request-kind">{{ req.child.username|name_cap }} · {{ _('request_type_reward') if req.request_type == 'reward' else (_('request_type_withdrawal') if req.request_type == 'withdrawal' else _('request_type_deposit')) }}</p>
         <p class="badge pending request-status">{{ req.status }}</p>
         <p class="muted request-description">{{ req.description }}</p>
         <p class="muted request-time">{{ req.created_at.strftime('%d/%m/%Y %H:%M') }}</p>

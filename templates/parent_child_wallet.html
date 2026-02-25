@@ -1,12 +1,12 @@
 {% extends 'base.html' %}
-{% block title %}{{ _('child_wallet', child=child.username) }} - {{ _('app_name') }}{% endblock %}
+{% block title %}{{ _('child_wallet', child=child.username|name_cap) }} - {{ _('app_name') }}{% endblock %}
 {% block content %}
 <nav class="actions-row">
   <a class="btn btn-secondary" href="{{ url_for('dashboard') }}">{{ _('back_dashboard') }}</a>
 </nav>
 
 <section class="card balance-card">
-  <p class="muted">{{ _('child_wallet', child=child.username) }}</p>
+  <p class="muted">{{ _('child_wallet', child=child.username|name_cap) }}</p>
   <p class="balance">{{ wallet.balance|eur }}</p>
 </section>
 

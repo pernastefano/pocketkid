@@ -11,7 +11,7 @@
     <label>{{ _('role_child') }}
       <select name="child_id" required>
         {% for child in children %}
-          <option value="{{ child.id }}">{{ child.username }}</option>
+          <option value="{{ child.id }}">{{ child.username|name_cap }}</option>
         {% endfor %}
       </select>
     </label>
@@ -62,7 +62,7 @@
     {% for item in recurring %}
       <div class="list-item block recurring-card">
         <div class="recurring-top-row">
-          <p class="label">{{ item.child.username }} · {{ _('deposit') if item.movement == 'deposit' else _('withdraw') }}</p>
+          <p class="label">{{ item.child.username|name_cap }} · {{ _('deposit') if item.movement == 'deposit' else _('withdraw') }}</p>
           <p class="amount {{ 'positive' if item.movement == 'deposit' else 'negative' }}">{{ item.amount|eur }}</p>
         </div>
         <p class="muted recurring-description">{{ item.description }}</p>

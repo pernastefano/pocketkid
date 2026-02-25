@@ -37,7 +37,7 @@
 
     {% if user %}
     <section class="welcome-row">
-      <p class="welcome-text">{{ _('welcome_user', username=user.username) }}</p>
+      <p class="welcome-text">{{ _('welcome_user', username=user.username|name_cap) }}</p>
     </section>
     {% endif %}
 

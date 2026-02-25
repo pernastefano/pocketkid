@@ -21,6 +21,7 @@ from .models import (
 )
 from .services import (
     VAPID_PUBLIC_KEY,
+    capitalize_name,
     create_notification,
     current_user,
     get_wallet_by_child,
@@ -216,7 +217,12 @@ def register_routes(app):
         )
         notify_all_parents(
             kind="approval_required",
-            message=tr("notif_reward_request", child=user.username, challenge=challenge.name, amount=f"{Decimal(challenge.amount):.2f}"),
+            message=tr(
+                "notif_reward_request",
+                child=capitalize_name(user.username),
+                challenge=challenge.name,
+                amount=f"{Decimal(challenge.amount):.2f}",
+            ),
         )
         db.session.commit()
         flash(tr("reward_request_sent"), "success")
@@ -242,7 +248,10 @@ def register_routes(app):
                 description=description,
             )
         )
-        notify_all_parents(kind="approval_required", message=tr("notif_withdraw_request", child=user.username, amount=f"{amount:.2f}"))
+        notify_all_parents(
+            kind="approval_required",
+            message=tr("notif_withdraw_request", child=capitalize_name(user.username), amount=f"{amount:.2f}"),
+        )
         db.session.commit()
         flash(tr("withdraw_request_sent"), "success")
         return redirect(url_for("dashboard"))
@@ -267,7 +276,10 @@ def register_routes(app):
                 description=description,
             )
         )
-        notify_all_parents(kind="approval_required", message=tr("notif_deposit_request", child=user.username, amount=f"{amount:.2f}"))
+        notify_all_parents(
+            kind="approval_required",
+            message=tr("notif_deposit_request", child=capitalize_name(user.username), amount=f"{amount:.2f}"),
+        )
         db.session.commit()
         flash(tr("deposit_request_sent"), "success")
         return redirect(url_for("dashboard"))

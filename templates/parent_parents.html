@@ -30,7 +30,7 @@
     {% for parent in parents %}
       <div class="list-item">
         <div>
-          <p class="label">{{ parent.username }}</p>
+          <p class="label">{{ parent.username|name_cap }}</p>
           <p class="muted">{{ _('preferred_language') }}: {{ parent.preferred_language or 'en' }}</p>
         </div>
         <form method="post" action="{{ url_for('delete_parent', parent_id=parent.id) }}" data-double-confirm="true" data-confirm-first="{{ _('confirm_delete_1') }}" data-confirm-second="{{ _('confirm_delete_2') }}">

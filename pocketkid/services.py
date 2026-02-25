@@ -54,6 +54,13 @@ def eur_filter(value: Decimal) -> str:
     return f"€ {Decimal(value):.2f}"
 
 
+def capitalize_name(value: str | None) -> str:
+    if not value:
+        return ""
+    text = str(value)
+    return text[:1].upper() + text[1:]
+
+
 def parse_amount(raw: str | None) -> Decimal | None:
     try:
         amount = Decimal(raw).quantize(Decimal("0.01"))
@@ -232,7 +239,7 @@ def process_recurring_movements():
         if item.movement == "withdraw" and Decimal(wallet.balance) < amount:
             notify_all_parents(
                 kind="recurring_failed",
-                message=tr("notif_recurring_failed", child=item.child.username, amount=f"{amount:.2f}"),
+                message=tr("notif_recurring_failed", child=capitalize_name(item.child.username), amount=f"{amount:.2f}"),
             )
             item.next_run_at = next_run(item.next_run_at, item.frequency)
             continue
@@ -273,5 +280,6 @@ def app_guardrails():
 
 def register_common_handlers(app):
     app.template_filter("eur")(eur_filter)
+    app.template_filter("name_cap")(capitalize_name)
     app.context_processor(inject_context)
     app.before_request(app_guardrails)
