@@ -24,13 +24,6 @@ The app is installable as a Progressive Web App (PWA) and supports real Web Push
   <a href="screens/child-dashboard.png"><img src="screens/child-dashboard.png" alt="Child Dashboard" width="240"></a>
 </p>
 
-- [Open original: Parent Dashboard](screens/parent-dashboard.png)
-- [Open original: Challenge Configuration](screens/challenge-config.png)
-- [Open original: Parent Deposit](screens/parent-deposit.png)
-- [Open original: Recurring Configuration](screens/recurring-config.png)
-- [Open original: Child Dashboard](screens/child-dashboard.png)
-
-
 ---
 
 # 2. Stack
