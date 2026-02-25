@@ -74,33 +74,6 @@ def register_routes(app):
                 preferred_language=parent_lang if parent_lang in SUPPORTED_LANGUAGES else "en",
             )
             db.session.add(parent)
-            db.session.flush()
-
-            create_child = request.form.get("create_first_child") == "1"
-            if create_child:
-                child_username = request.form.get("child_username", "").strip()
-                child_password = request.form.get("child_password", "")
-                child_balance = parse_amount(request.form.get("child_balance")) or Decimal("0.00")
-                child_lang = request.form.get("child_language", "en")
-
-                if child_username and len(child_password) >= 4 and not User.query.filter_by(username=child_username).first():
-                    child = User(
-                        username=child_username,
-                        password_hash=generate_password_hash(child_password),
-                        role="child",
-                        preferred_language=child_lang if child_lang in SUPPORTED_LANGUAGES else "en",
-                    )
-                    db.session.add(child)
-                    db.session.flush()
-                    db.session.add(Wallet(child_id=child.id, balance=child_balance))
-                    if child_balance > 0:
-                        register_transaction(
-                            child_id=child.id,
-                            kind="parent_deposit",
-                            amount=child_balance,
-                            description=tr("initial_balance"),
-                            created_by=parent.id,
-                        )
 
             db.session.commit()
             flash(tr("setup_completed"), "success")
