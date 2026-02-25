@@ -14,11 +14,21 @@ The app is installable as a Progressive Web App (PWA) and supports real Web Push
 
 ## Screens
 
-![Parent Dashboard](screens/parent-dashboard.png)
-![Challenge Configuration](screens/challenge-config.png)
-![Parent Deposit](screens/parent-deposit.png)
-![Recurring Configuration](screens/recurring-config.png)
-![Child Dashboard](screens/child-dashboard.png)
+<p>
+  <a href="screens/parent-dashboard.png"><img src="screens/parent-dashboard.png" alt="Parent Dashboard" width="240"></a>
+  <a href="screens/challenge-config.png"><img src="screens/challenge-config.png" alt="Challenge Configuration" width="240"></a>
+  <a href="screens/parent-deposit.png"><img src="screens/parent-deposit.png" alt="Parent Deposit" width="240"></a>
+</p>
+<p>
+  <a href="screens/recurring-config.png"><img src="screens/recurring-config.png" alt="Recurring Configuration" width="240"></a>
+  <a href="screens/child-dashboard.png"><img src="screens/child-dashboard.png" alt="Child Dashboard" width="240"></a>
+</p>
+
+- [Open original: Parent Dashboard](screens/parent-dashboard.png)
+- [Open original: Challenge Configuration](screens/challenge-config.png)
+- [Open original: Parent Deposit](screens/parent-deposit.png)
+- [Open original: Recurring Configuration](screens/recurring-config.png)
+- [Open original: Child Dashboard](screens/child-dashboard.png)
 
 
 ---
