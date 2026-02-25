@@ -30,6 +30,7 @@ class Challenge(db.Model):
     name = db.Column(db.String(120), nullable=False)
     amount = db.Column(db.Numeric(10, 2), nullable=False)
     active = db.Column(db.Boolean, nullable=False, default=True)
+    hidden = db.Column(db.Boolean, nullable=False, default=False)
     created_at = db.Column(db.DateTime, nullable=False, default=lambda: datetime.now(UTC))
 
 
@@ -85,6 +86,7 @@ class RecurringMovement(db.Model):
     challenge_id = db.Column(db.Integer, db.ForeignKey("challenge.id"), nullable=True)
     next_run_at = db.Column(db.DateTime, nullable=False)
     active = db.Column(db.Boolean, nullable=False, default=True)
+    hidden = db.Column(db.Boolean, nullable=False, default=False)
     created_at = db.Column(db.DateTime, nullable=False, default=lambda: datetime.now(UTC))
     created_by = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
 

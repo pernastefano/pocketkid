@@ -4,6 +4,7 @@ from datetime import UTC, datetime
 from decimal import Decimal
 
 from flask import flash, redirect, render_template, request, session, url_for
+from sqlalchemy.exc import SQLAlchemyError
 from werkzeug.security import generate_password_hash
 
 from .config import SUPPORTED_LANGUAGES
@@ -34,6 +35,12 @@ from .services import (
 
 
 def register_routes(app):
+    PAGE_SIZE = 10
+
+    def safe_page(param_name: str) -> int:
+        page = request.args.get(param_name, 1, type=int)
+        return page if page and page > 0 else 1
+
     @app.route("/")
     def index():
         if not has_parent():
@@ -127,40 +134,56 @@ def register_routes(app):
     def dashboard():
         user = current_user()
         if user.role == "parent":
-            children = User.query.filter_by(role="child").order_by(User.username.asc()).all()
+            children_page = safe_page("children_page")
+            pending_page = safe_page("pending_page")
+
+            children_pagination = (
+                User.query.filter_by(role="child")
+                .order_by(User.username.asc())
+                .paginate(page=children_page, per_page=PAGE_SIZE, error_out=False)
+            )
             child_rows = []
-            for child in children:
+            for child in children_pagination.items:
                 wallet = get_wallet_by_child(child.id)
                 pending_count = OperationRequest.query.filter_by(child_id=child.id, status="pending").count()
                 child_rows.append({"child": child, "wallet": wallet, "pending_count": pending_count})
 
-            pending_requests = (
+            pending_pagination = (
                 OperationRequest.query.filter_by(status="pending")
                 .order_by(OperationRequest.created_at.desc())
-                .all()
+                .paginate(page=pending_page, per_page=PAGE_SIZE, error_out=False)
             )
-            return render_template("parent_dashboard.html", child_rows=child_rows, pending_requests=pending_requests)
+            return render_template(
+                "parent_dashboard.html",
+                child_rows=child_rows,
+                pending_requests=pending_pagination.items,
+                children_pagination=children_pagination,
+                pending_pagination=pending_pagination,
+            )
 
         wallet = get_wallet_by_child(user.id)
-        challenges = Challenge.query.filter_by(active=True).order_by(Challenge.name.asc()).all()
-        requests = (
+        challenges = Challenge.query.filter_by(active=True, hidden=False).order_by(Challenge.name.asc()).all()
+        requests_page = safe_page("requests_page")
+        transactions_page = safe_page("transactions_page")
+
+        requests_pagination = (
             OperationRequest.query.filter_by(child_id=user.id)
             .order_by(OperationRequest.created_at.desc())
-            .limit(25)
-            .all()
+            .paginate(page=requests_page, per_page=PAGE_SIZE, error_out=False)
         )
-        transactions = (
+        transactions_pagination = (
             Transaction.query.filter_by(child_id=user.id)
             .order_by(Transaction.created_at.desc())
-            .limit(40)
-            .all()
+            .paginate(page=transactions_page, per_page=PAGE_SIZE, error_out=False)
         )
         return render_template(
             "child_dashboard.html",
             wallet=wallet,
             challenges=challenges,
-            requests=requests,
-            transactions=transactions,
+            requests=requests_pagination.items,
+            transactions=transactions_pagination.items,
+            requests_pagination=requests_pagination,
+            transactions_pagination=transactions_pagination,
         )
 
     @app.route("/settings", methods=["GET", "POST"])
@@ -202,7 +225,7 @@ def register_routes(app):
         challenge_id = request.form.get("challenge_id")
         challenge = db.session.get(Challenge, challenge_id) if challenge_id else None
 
-        if not challenge or not challenge.active:
+        if not challenge or not challenge.active or challenge.hidden:
             flash(tr("challenge_invalid"), "error")
             return redirect(url_for("dashboard"))
 
@@ -348,9 +371,21 @@ def register_routes(app):
             return redirect(url_for("dashboard"))
 
         wallet = get_wallet_by_child(child_id)
-        transactions = Transaction.query.filter_by(child_id=child_id).order_by(Transaction.created_at.desc()).all()
-        challenges = Challenge.query.filter_by(active=True).order_by(Challenge.name.asc()).all()
-        return render_template("parent_child_wallet.html", child=child, wallet=wallet, transactions=transactions, challenges=challenges)
+        page = safe_page("page")
+        tx_pagination = (
+            Transaction.query.filter_by(child_id=child_id)
+            .order_by(Transaction.created_at.desc())
+            .paginate(page=page, per_page=PAGE_SIZE, error_out=False)
+        )
+        challenges = Challenge.query.filter_by(active=True, hidden=False).order_by(Challenge.name.asc()).all()
+        return render_template(
+            "parent_child_wallet.html",
+            child=child,
+            wallet=wallet,
+            transactions=tx_pagination.items,
+            challenges=challenges,
+            transactions_pagination=tx_pagination,
+        )
 
     @app.route("/parent/child/<int:child_id>/manual", methods=["POST"])
     @login_required(role="parent")
@@ -390,7 +425,7 @@ def register_routes(app):
         challenge = None
         if movement == "deposit" and deposit_mode == "challenge":
             challenge = db.session.get(Challenge, challenge_id) if challenge_id else None
-            if not challenge:
+            if not challenge or challenge.hidden:
                 flash(tr("challenge_invalid"), "error")
                 return redirect(url_for("parent_child_wallet", child_id=child_id))
 
@@ -478,19 +513,46 @@ def register_routes(app):
             flash(tr("challenge_created"), "success")
             return redirect(url_for("parent_challenges"))
 
-        challenges = Challenge.query.order_by(Challenge.created_at.desc()).all()
-        return render_template("parent_challenges.html", challenges=challenges)
+        page = safe_page("page")
+        challenges_pagination = (
+            Challenge.query.filter_by(hidden=False)
+            .order_by(Challenge.created_at.desc())
+            .paginate(page=page, per_page=PAGE_SIZE, error_out=False)
+        )
+        return render_template("parent_challenges.html", challenges=challenges_pagination.items, challenges_pagination=challenges_pagination)
 
     @app.route("/parent/challenges/<int:challenge_id>/toggle", methods=["POST"])
     @login_required(role="parent")
     def toggle_challenge(challenge_id: int):
         challenge = db.session.get(Challenge, challenge_id)
-        if not challenge:
+        if not challenge or challenge.hidden:
             flash(tr("challenge_not_found"), "error")
             return redirect(url_for("parent_challenges"))
         challenge.active = not challenge.active
         db.session.commit()
         flash(tr("challenge_updated"), "success")
+        return redirect(url_for("parent_challenges"))
+
+    @app.route("/parent/challenges/<int:challenge_id>/delete", methods=["POST"])
+    @login_required(role="parent")
+    def delete_challenge(challenge_id: int):
+        challenge = db.session.get(Challenge, challenge_id)
+        if not challenge or challenge.hidden:
+            flash(tr("challenge_not_found"), "error")
+            return redirect(url_for("parent_challenges"))
+
+        try:
+            db.session.delete(challenge)
+            db.session.commit()
+            flash(tr("challenge_deleted"), "success")
+        except SQLAlchemyError:
+            db.session.rollback()
+            fallback = db.session.get(Challenge, challenge_id)
+            if fallback:
+                fallback.active = False
+                fallback.hidden = True
+                db.session.commit()
+            flash(tr("challenge_hidden"), "success")
         return redirect(url_for("parent_challenges"))
 
     @app.route("/parent/children", methods=["GET", "POST"])
@@ -533,9 +595,14 @@ def register_routes(app):
             flash(tr("child_created"), "success")
             return redirect(url_for("parent_children"))
 
-        children = User.query.filter_by(role="child").order_by(User.username.asc()).all()
-        rows = [{"child": child, "wallet": get_wallet_by_child(child.id)} for child in children]
-        return render_template("parent_children.html", child_rows=rows)
+        page = safe_page("page")
+        children_pagination = (
+            User.query.filter_by(role="child")
+            .order_by(User.username.asc())
+            .paginate(page=page, per_page=PAGE_SIZE, error_out=False)
+        )
+        rows = [{"child": child, "wallet": get_wallet_by_child(child.id)} for child in children_pagination.items]
+        return render_template("parent_children.html", child_rows=rows, children_pagination=children_pagination)
 
     @app.route("/parent/parents", methods=["GET", "POST"])
     @login_required(role="parent")
@@ -564,8 +631,19 @@ def register_routes(app):
             flash(tr("parent_created"), "success")
             return redirect(url_for("parent_parents"))
 
-        parents = User.query.filter_by(role="parent").order_by(User.username.asc()).all()
-        return render_template("parent_parents.html", parents=parents)
+        page = safe_page("page")
+        parents_total = User.query.filter_by(role="parent").count()
+        parents_pagination = (
+            User.query.filter_by(role="parent")
+            .order_by(User.username.asc())
+            .paginate(page=page, per_page=PAGE_SIZE, error_out=False)
+        )
+        return render_template(
+            "parent_parents.html",
+            parents=parents_pagination.items,
+            parents_pagination=parents_pagination,
+            parents_total=parents_total,
+        )
 
     @app.route("/parent/parent/<int:parent_id>/delete", methods=["POST"])
     @login_required(role="parent")
@@ -633,7 +711,7 @@ def register_routes(app):
             challenge = None
             if movement == "deposit" and deposit_mode == "challenge":
                 challenge = db.session.get(Challenge, challenge_id) if challenge_id else None
-                if not challenge:
+                if not challenge or challenge.hidden:
                     flash(tr("challenge_invalid"), "error")
                     return redirect(url_for("parent_recurring"))
                 if not description:
@@ -667,20 +745,53 @@ def register_routes(app):
             return redirect(url_for("parent_recurring"))
 
         children = User.query.filter_by(role="child").order_by(User.username.asc()).all()
-        challenges = Challenge.query.filter_by(active=True).order_by(Challenge.name.asc()).all()
-        recurring = RecurringMovement.query.order_by(RecurringMovement.next_run_at.asc()).all()
-        return render_template("parent_recurring.html", children=children, challenges=challenges, recurring=recurring)
+        challenges = Challenge.query.filter_by(active=True, hidden=False).order_by(Challenge.name.asc()).all()
+        page = safe_page("page")
+        recurring_pagination = (
+            RecurringMovement.query.filter_by(hidden=False)
+            .order_by(RecurringMovement.next_run_at.asc())
+            .paginate(page=page, per_page=PAGE_SIZE, error_out=False)
+        )
+        return render_template(
+            "parent_recurring.html",
+            children=children,
+            challenges=challenges,
+            recurring=recurring_pagination.items,
+            recurring_pagination=recurring_pagination,
+        )
 
     @app.route("/parent/recurring/<int:item_id>/toggle", methods=["POST"])
     @login_required(role="parent")
     def toggle_recurring(item_id: int):
         item = db.session.get(RecurringMovement, item_id)
-        if not item:
+        if not item or item.hidden:
             flash(tr("recurring_not_found"), "error")
             return redirect(url_for("parent_recurring"))
         item.active = not item.active
         db.session.commit()
         flash(tr("recurring_updated"), "success")
+        return redirect(url_for("parent_recurring"))
+
+    @app.route("/parent/recurring/<int:item_id>/delete", methods=["POST"])
+    @login_required(role="parent")
+    def delete_recurring(item_id: int):
+        item = db.session.get(RecurringMovement, item_id)
+        if not item or item.hidden:
+            flash(tr("recurring_not_found"), "error")
+            return redirect(url_for("parent_recurring"))
+
+        try:
+            db.session.delete(item)
+            db.session.commit()
+            flash(tr("recurring_deleted"), "success")
+        except SQLAlchemyError:
+            db.session.rollback()
+            fallback = db.session.get(RecurringMovement, item_id)
+            if fallback:
+                fallback.active = False
+                fallback.hidden = True
+                db.session.commit()
+            flash(tr("recurring_hidden"), "success")
         return redirect(url_for("parent_recurring"))
 
     @app.route("/api/notifications", methods=["GET"])
@@ -691,7 +802,7 @@ def register_routes(app):
         unread = (
             Notification.query.filter_by(user_id=user.id, is_read=False)
             .order_by(Notification.created_at.asc())
-            .limit(30)
+            .limit(PAGE_SIZE)
             .all()
         )
         items = [

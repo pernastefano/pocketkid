@@ -142,6 +142,8 @@
   "challenge_created": "Sfida creata",
   "challenge_not_found": "Sfida non trovata",
   "challenge_updated": "Stato sfida aggiornato",
+  "challenge_deleted": "Sfida eliminata",
+  "challenge_hidden": "La sfida non può essere eliminata ed è stata nascosta",
   "child_created": "Figlio creato correttamente",
   "parent_created": "Genitore creato correttamente",
   "parent_not_found": "Genitore non trovato",
@@ -153,6 +155,8 @@
   "recurring_created": "Movimento ricorrente creato",
   "recurring_not_found": "Movimento ricorrente non trovato",
   "recurring_updated": "Movimento ricorrente aggiornato",
+  "recurring_deleted": "Movimento ricorrente eliminato",
+  "recurring_hidden": "Il movimento ricorrente non può essere eliminato ed è stato nascosto",
   "notif_reward_request": "{child} ha richiesto approvazione premio: {challenge} ({amount}€)",
   "notif_withdraw_request": "{child} ha richiesto un prelievo di {amount}€",
   "notif_deposit_request": "{child} ha richiesto un versamento di {amount}€",
@@ -164,6 +168,8 @@
   "notif_recurring_failed": "Prelievo ricorrente fallito per {child}: saldo insufficiente per {amount}€",
   "confirm_delete_1": "Sei sicuro di voler continuare?",
   "confirm_delete_2": "Conferma finale: eseguire eliminazione permanente?",
+  "confirm_delete_generic": "Sei sicuro di voler eliminare questo elemento?",
+  "delete": "Elimina",
   "lang_en": "Inglese",
   "lang_it": "Italiano"
 }

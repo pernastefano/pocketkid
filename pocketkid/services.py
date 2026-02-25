@@ -136,6 +136,16 @@ def ensure_schema_updates():
         db.session.execute(text("ALTER TABLE user ADD COLUMN preferred_language VARCHAR(5)"))
         db.session.commit()
 
+    challenge_columns = [row[1] for row in db.session.execute(text("PRAGMA table_info(challenge)"))]
+    if "hidden" not in challenge_columns:
+        db.session.execute(text("ALTER TABLE challenge ADD COLUMN hidden BOOLEAN NOT NULL DEFAULT 0"))
+        db.session.commit()
+
+    recurring_columns = [row[1] for row in db.session.execute(text("PRAGMA table_info(recurring_movement)"))]
+    if "hidden" not in recurring_columns:
+        db.session.execute(text("ALTER TABLE recurring_movement ADD COLUMN hidden BOOLEAN NOT NULL DEFAULT 0"))
+        db.session.commit()
+
 
 def get_wallet_by_child(child_id: int) -> Wallet:
     wallet = Wallet.query.filter_by(child_id=child_id).first()

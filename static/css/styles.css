@@ -33,7 +33,12 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 8px 0 16px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  padding: calc(8px + env(safe-area-inset-top, 0px)) 0 12px;
+  margin-bottom: 4px;
+  background: var(--bg);
 }
 
 .brand-wrap {
@@ -222,6 +227,14 @@ select {
   gap: 8px;
 }
 
+.parent-dashboard-actions {
+  flex-wrap: wrap;
+}
+
+.parent-dashboard-actions .btn {
+  flex: 1 1 calc(50% - 8px);
+}
+
 .icon-actions {
   display: flex;
   gap: 10px;
@@ -395,8 +408,85 @@ select {
   background: var(--primary-soft);
 }
 
+.recurring-card,
+.challenge-card {
+  gap: 8px;
+}
+
+.recurring-top-row,
+.challenge-top-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.recurring-top-row .amount,
+.challenge-top-row .amount {
+  margin: 0;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.recurring-top-row .label,
+.challenge-top-row .label {
+  margin: 0;
+}
+
+.recurring-description,
+.recurring-meta {
+  margin: 0;
+}
+
+.recurring-actions,
+.challenge-actions {
+  margin-top: 4px;
+}
+
+.recurring-actions form,
+.challenge-actions form {
+  margin: 0;
+}
+
 @media (min-width: 768px) {
   .app-shell {
     padding-top: 24px;
+  }
+}
+
+@media (max-width: 399px) {
+  .parent-dashboard-actions {
+    gap: 6px;
+  }
+
+  .parent-dashboard-actions .btn {
+    flex: 1 1 100%;
+    min-height: 42px;
+    padding: 10px;
+  }
+
+  .recurring-top-row,
+  .challenge-top-row {
+    gap: 6px;
+  }
+
+  .recurring-actions,
+  .challenge-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+    width: 100%;
+  }
+
+  .recurring-actions form,
+  .challenge-actions form {
+    width: 100%;
+  }
+
+  .recurring-actions .btn,
+  .challenge-actions .btn {
+    width: 100%;
+    min-height: 40px;
+    padding: 8px 10px;
   }
 }

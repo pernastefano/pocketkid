@@ -60,15 +60,22 @@
   <h2>{{ _('configured_recurring') }}</h2>
   <div class="list">
     {% for item in recurring %}
-      <div class="list-item block">
-        <div>
-          <p class="label">{{ item.child.username }} · {{ _('deposit') if item.movement == 'deposit' else _('withdraw') }} · {{ item.amount|eur }}</p>
-          <p class="muted">{{ item.description }}</p>
-          <p class="muted">{{ _('next_run') }}: {{ item.next_run_at.strftime('%d/%m/%Y') }}</p>
+      <div class="list-item block recurring-card">
+        <div class="recurring-top-row">
+          <p class="label">{{ item.child.username }} · {{ _('deposit') if item.movement == 'deposit' else _('withdraw') }}</p>
+          <p class="amount {{ 'positive' if item.movement == 'deposit' else 'negative' }}">{{ item.amount|eur }}</p>
         </div>
-        <form method="post" action="{{ url_for('toggle_recurring', item_id=item.id) }}">
-          <button class="btn btn-secondary" type="submit">{{ _('deactivate') if item.active else _('activate') }}</button>
-        </form>
+        <p class="muted recurring-description">{{ item.description }}</p>
+        <p class="muted recurring-meta">{{ _('frequency') }}: {{ _(item.frequency) }} 
+            <br>{{ _('next_run') }}: {{ item.next_run_at.strftime('%d/%m/%Y') }}</p>
+        <div class="inline-actions recurring-actions">
+          <form method="post" action="{{ url_for('toggle_recurring', item_id=item.id) }}">
+            <button class="btn btn-secondary" type="submit">{{ _('deactivate') if item.active else _('activate') }}</button>
+          </form>
+          <form method="post" action="{{ url_for('delete_recurring', item_id=item.id) }}" data-confirm="{{ _('confirm_delete_generic') }}" onsubmit="return confirm(this.dataset.confirm)">
+            <button class="btn btn-secondary" type="submit">{{ _('delete') }}</button>
+          </form>
+        </div>
       </div>
     {% else %}
       <p class="muted">-</p>

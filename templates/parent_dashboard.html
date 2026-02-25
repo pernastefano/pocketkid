@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% block title %}{{ _('dashboard_parent') }} - {{ _('app_name') }}{% endblock %}
 {% block content %}
-<nav class="actions-row">
+<nav class="actions-row parent-dashboard-actions">
   <a class="btn" href="{{ url_for('parent_children') }}">{{ _('manage_children') }}</a>
   <a class="btn" href="{{ url_for('parent_parents') }}">{{ _('manage_parents') }}</a>
   <a class="btn" href="{{ url_for('parent_recurring') }}">{{ _('manage_recurring') }}</a>

@@ -22,15 +22,20 @@
   <h2>{{ _('configured_challenges') }}</h2>
   <div class="list">
     {% for challenge in challenges %}
-      <div class="list-item">
-        <div>
+      <div class="list-item block challenge-card">
+        <div class="challenge-top-row">
+          <div>
           <p class="label">{{ challenge.name }}</p>
           <p class="muted">{{ challenge.created_at.strftime('%d/%m/%Y') }}</p>
+          </div>
+          <p class="amount {{ 'positive' if challenge.amount >= 0 else 'negative' }}">{{ challenge.amount|eur }}</p>
         </div>
-        <p class="amount {{ 'positive' if challenge.amount >= 0 else 'negative' }}">{{ challenge.amount|eur }}</p>
-        <div class="inline-actions">
+        <div class="inline-actions challenge-actions">
           <form method="post" action="{{ url_for('toggle_challenge', challenge_id=challenge.id) }}">
             <button class="btn btn-secondary" type="submit">{{ _('deactivate') if challenge.active else _('activate') }}</button>
+          </form>
+          <form method="post" action="{{ url_for('delete_challenge', challenge_id=challenge.id) }}" data-confirm="{{ _('confirm_delete_generic') }}" onsubmit="return confirm(this.dataset.confirm)">
+            <button class="btn btn-secondary" type="submit">{{ _('delete') }}</button>
           </form>
         </div>
       </div>
