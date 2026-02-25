@@ -30,7 +30,9 @@
           <span aria-hidden="true">✉</span>
           <span id="notify-badge" class="notify-badge hidden">0</span>
         </button>
-        <a class="btn btn-secondary" href="{{ url_for('logout') }}">{{ _('logout') }}</a>
+        <a class="btn btn-secondary icon-btn" href="{{ url_for('logout') }}" aria-label="{{ _('logout') }}" title="{{ _('logout') }}">
+          <span aria-hidden="true">⎋</span>
+        </a>
         {% endif %}
       </div>
     </header>
