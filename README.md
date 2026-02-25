@@ -211,7 +211,13 @@ Notes:
 ---
 
 ## Project Structure (Quick Reference)
-- `app.py` → Flask app, models, routes, push logic
+- `app.py` → minimal application entrypoint
+- `pocketkid/config.py` → configuration and paths
+- `pocketkid/extensions.py` → shared extensions (SQLAlchemy)
+- `pocketkid/models.py` → database models
+- `pocketkid/services.py` → support/business utilities (auth helpers, i18n, push, recurring)
+- `pocketkid/routes.py` → HTTP routes
+- `pocketkid/__init__.py` → app factory and bootstrap
 - `templates/` → UI views
 - `static/` → CSS, JS, Service Worker, manifest, icons
 - `locales/` → i18n files (`en.json`, `it.json`)
@@ -222,7 +228,7 @@ Notes:
 ---
 
 ## Credits
-- Stefano Perna
+Stefano Perna
 
 ## License
 This project is licensed under the MIT License. See the `LICENSE` file for details.
