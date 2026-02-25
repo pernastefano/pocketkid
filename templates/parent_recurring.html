@@ -81,5 +81,20 @@
       <p class="muted">-</p>
     {% endfor %}
   </div>
+  {% if recurring_pagination.pages > 1 %}
+  <nav class="pagination-row">
+    {% if recurring_pagination.has_prev %}
+      <a class="btn btn-secondary" href="{{ url_for('parent_recurring', page=recurring_pagination.prev_num) }}">{{ _('prev') }}</a>
+    {% else %}
+      <span></span>
+    {% endif %}
+    <span class="muted pagination-label">{{ recurring_pagination.page }}/{{ recurring_pagination.pages }}</span>
+    {% if recurring_pagination.has_next %}
+      <a class="btn btn-secondary" href="{{ url_for('parent_recurring', page=recurring_pagination.next_num) }}">{{ _('next') }}</a>
+    {% else %}
+      <span></span>
+    {% endif %}
+  </nav>
+  {% endif %}
 </section>
 {% endblock %}

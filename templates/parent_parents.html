@@ -35,12 +35,27 @@
         </div>
         <form method="post" action="{{ url_for('delete_parent', parent_id=parent.id) }}" data-double-confirm="true" data-confirm-first="{{ _('confirm_delete_1') }}" data-confirm-second="{{ _('confirm_delete_2') }}">
           <input type="hidden" name="double_confirmed" value="0">
-          <button class="btn btn-secondary" type="submit" {% if parents|length <= 1 %}disabled{% endif %}>{{ _('delete_parent') }}</button>
+          <button class="btn btn-secondary" type="submit" {% if parents_total <= 1 %}disabled{% endif %}>{{ _('delete_parent') }}</button>
         </form>
       </div>
     {% else %}
       <p class="muted">-</p>
     {% endfor %}
   </div>
+  {% if parents_pagination.pages > 1 %}
+  <nav class="pagination-row">
+    {% if parents_pagination.has_prev %}
+      <a class="btn btn-secondary" href="{{ url_for('parent_parents', page=parents_pagination.prev_num) }}">{{ _('prev') }}</a>
+    {% else %}
+      <span></span>
+    {% endif %}
+    <span class="muted pagination-label">{{ parents_pagination.page }}/{{ parents_pagination.pages }}</span>
+    {% if parents_pagination.has_next %}
+      <a class="btn btn-secondary" href="{{ url_for('parent_parents', page=parents_pagination.next_num) }}">{{ _('next') }}</a>
+    {% else %}
+      <span></span>
+    {% endif %}
+  </nav>
+  {% endif %}
 </section>
 {% endblock %}

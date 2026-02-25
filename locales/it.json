@@ -170,6 +170,8 @@
   "confirm_delete_2": "Conferma finale: eseguire eliminazione permanente?",
   "confirm_delete_generic": "Sei sicuro di voler eliminare questo elemento?",
   "delete": "Elimina",
+  "prev": "Prec",
+  "next": "Succ",
   "lang_en": "Inglese",
   "lang_it": "Italiano"
 }

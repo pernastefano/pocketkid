@@ -45,5 +45,20 @@
       <p class="muted">{{ _('no_children') }}</p>
     {% endfor %}
   </div>
+  {% if children_pagination.pages > 1 %}
+  <nav class="pagination-row">
+    {% if children_pagination.has_prev %}
+      <a class="btn btn-secondary" href="{{ url_for('parent_children', page=children_pagination.prev_num) }}">{{ _('prev') }}</a>
+    {% else %}
+      <span></span>
+    {% endif %}
+    <span class="muted pagination-label">{{ children_pagination.page }}/{{ children_pagination.pages }}</span>
+    {% if children_pagination.has_next %}
+      <a class="btn btn-secondary" href="{{ url_for('parent_children', page=children_pagination.next_num) }}">{{ _('next') }}</a>
+    {% else %}
+      <span></span>
+    {% endif %}
+  </nav>
+  {% endif %}
 </section>
 {% endblock %}

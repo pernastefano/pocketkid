@@ -43,5 +43,20 @@
       <p class="muted">{{ _('no_challenges') }}</p>
     {% endfor %}
   </div>
+  {% if challenges_pagination.pages > 1 %}
+  <nav class="pagination-row">
+    {% if challenges_pagination.has_prev %}
+      <a class="btn btn-secondary" href="{{ url_for('parent_challenges', page=challenges_pagination.prev_num) }}">{{ _('prev') }}</a>
+    {% else %}
+      <span></span>
+    {% endif %}
+    <span class="muted pagination-label">{{ challenges_pagination.page }}/{{ challenges_pagination.pages }}</span>
+    {% if challenges_pagination.has_next %}
+      <a class="btn btn-secondary" href="{{ url_for('parent_challenges', page=challenges_pagination.next_num) }}">{{ _('next') }}</a>
+    {% else %}
+      <span></span>
+    {% endif %}
+  </nav>
+  {% endif %}
 </section>
 {% endblock %}

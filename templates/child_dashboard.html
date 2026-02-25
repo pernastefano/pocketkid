@@ -73,6 +73,21 @@
       <p class="muted">{{ _('no_requests') }}</p>
     {% endfor %}
   </div>
+  {% if requests_pagination.pages > 1 %}
+  <nav class="pagination-row">
+    {% if requests_pagination.has_prev %}
+      <a class="btn btn-secondary" href="{{ url_for('dashboard', requests_page=requests_pagination.prev_num, transactions_page=transactions_pagination.page) }}">{{ _('prev') }}</a>
+    {% else %}
+      <span></span>
+    {% endif %}
+    <span class="muted pagination-label">{{ requests_pagination.page }}/{{ requests_pagination.pages }}</span>
+    {% if requests_pagination.has_next %}
+      <a class="btn btn-secondary" href="{{ url_for('dashboard', requests_page=requests_pagination.next_num, transactions_page=transactions_pagination.page) }}">{{ _('next') }}</a>
+    {% else %}
+      <span></span>
+    {% endif %}
+  </nav>
+  {% endif %}
 </section>
 
 <section class="card">
@@ -90,5 +105,20 @@
       <p class="muted">{{ _('no_operations') }}</p>
     {% endfor %}
   </div>
+  {% if transactions_pagination.pages > 1 %}
+  <nav class="pagination-row">
+    {% if transactions_pagination.has_prev %}
+      <a class="btn btn-secondary" href="{{ url_for('dashboard', requests_page=requests_pagination.page, transactions_page=transactions_pagination.prev_num) }}">{{ _('prev') }}</a>
+    {% else %}
+      <span></span>
+    {% endif %}
+    <span class="muted pagination-label">{{ transactions_pagination.page }}/{{ transactions_pagination.pages }}</span>
+    {% if transactions_pagination.has_next %}
+      <a class="btn btn-secondary" href="{{ url_for('dashboard', requests_page=requests_pagination.page, transactions_page=transactions_pagination.next_num) }}">{{ _('next') }}</a>
+    {% else %}
+      <span></span>
+    {% endif %}
+  </nav>
+  {% endif %}
 </section>
 {% endblock %}

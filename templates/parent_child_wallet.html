@@ -58,6 +58,21 @@
       <p class="muted">{{ _('no_operations') }}</p>
     {% endfor %}
   </div>
+  {% if transactions_pagination.pages > 1 %}
+  <nav class="pagination-row">
+    {% if transactions_pagination.has_prev %}
+      <a class="btn btn-secondary" href="{{ url_for('parent_child_wallet', child_id=child.id, page=transactions_pagination.prev_num) }}">{{ _('prev') }}</a>
+    {% else %}
+      <span></span>
+    {% endif %}
+    <span class="muted pagination-label">{{ transactions_pagination.page }}/{{ transactions_pagination.pages }}</span>
+    {% if transactions_pagination.has_next %}
+      <a class="btn btn-secondary" href="{{ url_for('parent_child_wallet', child_id=child.id, page=transactions_pagination.next_num) }}">{{ _('next') }}</a>
+    {% else %}
+      <span></span>
+    {% endif %}
+  </nav>
+  {% endif %}
 </section>
 
 <section class="card">

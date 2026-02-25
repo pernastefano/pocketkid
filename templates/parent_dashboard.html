@@ -23,6 +23,21 @@
       <p class="muted">{{ _('no_children') }}</p>
     {% endfor %}
   </div>
+  {% if children_pagination.pages > 1 %}
+  <nav class="pagination-row">
+    {% if children_pagination.has_prev %}
+      <a class="btn btn-secondary" href="{{ url_for('dashboard', children_page=children_pagination.prev_num, pending_page=pending_pagination.page) }}">{{ _('prev') }}</a>
+    {% else %}
+      <span></span>
+    {% endif %}
+    <span class="muted pagination-label">{{ children_pagination.page }}/{{ children_pagination.pages }}</span>
+    {% if children_pagination.has_next %}
+      <a class="btn btn-secondary" href="{{ url_for('dashboard', children_page=children_pagination.next_num, pending_page=pending_pagination.page) }}">{{ _('next') }}</a>
+    {% else %}
+      <span></span>
+    {% endif %}
+  </nav>
+  {% endif %}
 </section>
 
 <section class="card">
@@ -50,5 +65,20 @@
       <p class="muted">{{ _('no_pending_requests') }}</p>
     {% endfor %}
   </div>
+  {% if pending_pagination.pages > 1 %}
+  <nav class="pagination-row">
+    {% if pending_pagination.has_prev %}
+      <a class="btn btn-secondary" href="{{ url_for('dashboard', children_page=children_pagination.page, pending_page=pending_pagination.prev_num) }}">{{ _('prev') }}</a>
+    {% else %}
+      <span></span>
+    {% endif %}
+    <span class="muted pagination-label">{{ pending_pagination.page }}/{{ pending_pagination.pages }}</span>
+    {% if pending_pagination.has_next %}
+      <a class="btn btn-secondary" href="{{ url_for('dashboard', children_page=children_pagination.page, pending_page=pending_pagination.next_num) }}">{{ _('next') }}</a>
+    {% else %}
+      <span></span>
+    {% endif %}
+  </nav>
+  {% endif %}
 </section>
 {% endblock %}
