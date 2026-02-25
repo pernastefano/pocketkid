@@ -22,6 +22,7 @@ The app is installable as a Progressive Web App (PWA) and supports real Web Push
 <p>
   <a href="screens/recurring-config.png"><img src="screens/recurring-config.png" alt="Recurring Configuration" width="240"></a>
   <a href="screens/child-dashboard.png"><img src="screens/child-dashboard.png" alt="Child Dashboard" width="240"></a>
+  <a href="screens/child-request.png"><img src="screens/child-request.png" alt="Child Request" width="240"></a>
 </p>
 
 ---
