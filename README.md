@@ -2,6 +2,9 @@
 
 PocketKid is a mobile-first Python PWA for family virtual wallet management.
 
+Public repository:
+- https://github.com/pernastefano/pocketkid
+
 Parents and children access the same app with role-based features:
 - Children can request rewards (from configured challenges), withdrawals, and generic deposits.
 - Parents can approve/reject requests, perform manual wallet movements, configure recurring movements, manage users, and review full history.
@@ -101,7 +104,7 @@ cp .env.example .env
 ```
 
 ```bash
-docker compose up --build
+docker compose up -d
 ```
 
 The default compose file:

@@ -1,6 +1,6 @@
 services:
   pocketkid:
-    image:  ghcr.io/pernastefano/pocketkid:latest
+    image: ghcr.io/pernastefano/pocketkid:latest
     container_name: pocketkid
     env_file:
       - .env
