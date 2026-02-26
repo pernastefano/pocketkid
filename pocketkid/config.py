@@ -15,6 +15,9 @@ DB_PATH = DATA_DIR / "pocketkid.db"
 LOCALES_DIR = BASE_DIR / "locales"
 
 SUPPORTED_LANGUAGES = ("en", "it")
+APP_VERSION = os.getenv("APP_VERSION", "1.0.0")
+APP_CREDITS = os.getenv("APP_CREDITS", "Stefano Perna")
+APP_REPO_URL = os.getenv("APP_REPO_URL", "https://github.com/pernastefano/pocketkid")
 
 
 class Settings:

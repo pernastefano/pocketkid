@@ -11,7 +11,7 @@ from flask import flash, g, redirect, request, session, url_for
 from pywebpush import WebPushException, webpush
 from sqlalchemy import text
 
-from .config import LOCALES_DIR, SUPPORTED_LANGUAGES
+from .config import APP_CREDITS, APP_REPO_URL, APP_VERSION, LOCALES_DIR, SUPPORTED_LANGUAGES
 from .extensions import db
 from .models import Notification, PushSubscription, RecurringMovement, Transaction, User, Wallet
 
@@ -117,6 +117,9 @@ def inject_context():
         "_": tr,
         "current_locale": locale,
         "available_languages": SUPPORTED_LANGUAGES,
+        "app_version": APP_VERSION,
+        "app_credits": APP_CREDITS,
+        "app_repo_url": APP_REPO_URL,
     }
 
 

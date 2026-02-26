@@ -32,4 +32,13 @@
     <button class="btn" type="submit">{{ _('save_password') }}</button>
   </form>
 </section>
+
+<section class="card">
+  <h2>{{ _('app_info') }}</h2>
+  <div class="stack">
+    <p class="muted">{{ _('app_version_label') }}: <strong>{{ app_version }}</strong></p>
+    <p class="muted">{{ _('app_credits_label') }}: <strong>{{ app_credits }}</strong></p>
+    <a class="btn btn-secondary" href="{{ app_repo_url }}" target="_blank" rel="noopener noreferrer">{{ _('app_repo_label') }}</a>
+  </div>
+</section>
 {% endblock %}
