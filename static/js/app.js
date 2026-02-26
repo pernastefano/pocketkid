@@ -75,6 +75,23 @@ const ensurePushPermissionAndSubscribe = async () => {
   }
 };
 
+let pushPromptBound = false;
+const bindFirstInteractionPushPrompt = () => {
+  if (pushPromptBound) {
+    return;
+  }
+  pushPromptBound = true;
+
+  const tryOnce = async () => {
+    window.removeEventListener('click', tryOnce, true);
+    window.removeEventListener('touchstart', tryOnce, true);
+    await ensurePushPermissionAndSubscribe();
+  };
+
+  window.addEventListener('click', tryOnce, { capture: true, passive: true });
+  window.addEventListener('touchstart', tryOnce, { capture: true, passive: true });
+};
+
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.addEventListener('message', (event) => {
     if (!event.data || event.data.type !== 'PUSH_EVENT') {
@@ -173,6 +190,8 @@ const notifyEmpty = document.getElementById('notify-empty');
 const notifyBadge = document.getElementById('notify-badge');
 
 if (notifyToggle && notifyPanel && notifyList && notifyEmpty && notifyBadge) {
+  let previousUnreadCount = 0;
+
   const updateBadge = (count) => {
     notifyBadge.textContent = String(count);
     if (count > 0) {
@@ -231,6 +250,16 @@ if (notifyToggle && notifyPanel && notifyList && notifyEmpty && notifyBadge) {
         });
       }
     }
+
+    const isDashboardView = window.location.pathname === '/dashboard';
+    const panelHidden = notifyPanel.classList.contains('hidden');
+    if (isDashboardView && panelHidden && unreadCount > previousUnreadCount && document.visibilityState === 'visible') {
+      setTimeout(() => {
+        window.location.reload();
+      }, 500);
+    }
+
+    previousUnreadCount = unreadCount;
   };
 
   const fetchNotifications = async (markRead = false) => {
@@ -248,8 +277,12 @@ if (notifyToggle && notifyPanel && notifyList && notifyEmpty && notifyBadge) {
   };
 
   fetchNotifications();
-  if ('Notification' in window && Notification.permission === 'granted') {
-    setupWebPushSubscription();
+  if ('Notification' in window) {
+    if (Notification.permission === 'granted') {
+      setupWebPushSubscription();
+    } else if (Notification.permission === 'default') {
+      bindFirstInteractionPushPrompt();
+    }
   }
   setInterval(fetchNotifications, 15000);
 }

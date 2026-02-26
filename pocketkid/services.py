@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import base64
 import json
+import logging
 import os
 from datetime import UTC, datetime, timedelta
 from decimal import Decimal, InvalidOperation
@@ -14,6 +15,9 @@ from sqlalchemy import text
 from .config import APP_CREDITS, APP_REPO_URL, APP_VERSION, LOCALES_DIR, SUPPORTED_LANGUAGES
 from .extensions import db
 from .models import Notification, PushSubscription, RecurringMovement, Transaction, User, Wallet
+
+
+logger = logging.getLogger("pocketkid.push")
 
 
 def load_vapid_keys() -> tuple[str, str]:
@@ -201,6 +205,7 @@ def send_web_push_notification(*, user_id: int, title: str, message: str, url: s
             status_code = getattr(exc.response, "status_code", None)
             if status_code in {404, 410}:
                 sub.is_active = False
+            logger.warning("Push delivery failed for user_id=%s status=%s error=%s", user_id, status_code, exc)
 
 
 def create_notification(*, user_id: int, kind: str, message: str):
