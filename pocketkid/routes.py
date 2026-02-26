@@ -95,6 +95,7 @@ def register_routes(app):
                 flash(tr("invalid_credentials"), "error")
                 return render_template("login.html")
             session["user_id"] = user.id
+            session.permanent = request.form.get("remember_me") == "1"
             return redirect(url_for("dashboard"))
         return render_template("login.html")
 
@@ -784,28 +785,27 @@ def register_routes(app):
     def notifications_feed():
         user = current_user()
         mark_read = request.args.get("mark_read") == "1"
-        unread = (
-            Notification.query.filter_by(user_id=user.id, is_read=False)
-            .order_by(Notification.created_at.asc())
-            .limit(PAGE_SIZE)
-            .all()
-        )
-        items = [
-            {
-                "id": n.id,
-                "kind": n.kind,
-                "message": n.message,
-                "created_at": normalize_dt(n.created_at).strftime("%d/%m/%Y %H:%M"),
-            }
-            for n in unread
-        ]
+        unread = Notification.query.filter_by(user_id=user.id, is_read=False).order_by(Notification.created_at.desc()).all()
 
         if mark_read:
             for n in unread:
                 n.is_read = True
             db.session.commit()
 
-        return {"items": items}
+        recent = Notification.query.filter_by(user_id=user.id).order_by(Notification.created_at.desc()).limit(PAGE_SIZE).all()
+        unread_count = Notification.query.filter_by(user_id=user.id, is_read=False).count()
+        items = [
+            {
+                "id": n.id,
+                "kind": n.kind,
+                "message": n.message,
+                "is_read": n.is_read,
+                "created_at": normalize_dt(n.created_at).strftime("%d/%m/%Y %H:%M"),
+            }
+            for n in recent
+        ]
+
+        return {"items": items, "unreadCount": unread_count}
 
     @app.route("/api/push/public-key", methods=["GET"])
     @login_required()

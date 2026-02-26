@@ -19,6 +19,7 @@
   "family_wallet": "Portafoglio virtuale famigliare",
   "username": "Username",
   "password": "Password",
+  "remember_me": "Ricordami",
   "sign_in": "Entra",
   "dashboard_parent": "Dashboard Genitore",
   "dashboard_child": "Dashboard Figlio",

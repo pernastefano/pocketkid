@@ -25,9 +25,6 @@ const setupWebPushSubscription = async () => {
   }
 
   try {
-    if (Notification.permission === 'default') {
-      await Notification.requestPermission();
-    }
     if (Notification.permission !== 'granted') {
       return;
     }
@@ -53,10 +50,28 @@ const setupWebPushSubscription = async () => {
       method: 'POST',
       credentials: 'same-origin',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(subscription)
+      body: JSON.stringify(subscription.toJSON())
     });
   } catch (error) {
     console.debug('push subscription unavailable', error);
+  }
+};
+
+const ensurePushPermissionAndSubscribe = async () => {
+  if (!('Notification' in window)) {
+    return;
+  }
+
+  try {
+    if (Notification.permission === 'default') {
+      const result = await Notification.requestPermission();
+      if (result !== 'granted') {
+        return;
+      }
+    }
+    await setupWebPushSubscription();
+  } catch (error) {
+    console.debug('push permission unavailable', error);
   }
 };
 
@@ -158,9 +173,6 @@ const notifyEmpty = document.getElementById('notify-empty');
 const notifyBadge = document.getElementById('notify-badge');
 
 if (notifyToggle && notifyPanel && notifyList && notifyEmpty && notifyBadge) {
-  const renderedIds = new Set();
-  let autoRefreshScheduled = false;
-
   const updateBadge = (count) => {
     notifyBadge.textContent = String(count);
     if (count > 0) {
@@ -173,50 +185,15 @@ if (notifyToggle && notifyPanel && notifyList && notifyEmpty && notifyBadge) {
   notifyToggle.addEventListener('click', () => {
     const wasHidden = notifyPanel.classList.contains('hidden');
     notifyPanel.classList.toggle('hidden');
+    ensurePushPermissionAndSubscribe();
     if (wasHidden) {
       fetchNotifications(true);
     }
   });
 
-  if ('Notification' in window && Notification.permission === 'default') {
-    Notification.requestPermission();
-  }
-
-  const isUserTyping = () => {
-    const active = document.activeElement;
-    if (!active) return false;
-    const tag = active.tagName;
-    return tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT';
-  };
-
-  const acknowledgeNotifications = async () => {
-    try {
-      await fetch('/api/notifications?mark_read=1', { credentials: 'same-origin' });
-    } catch (error) {
-      console.debug('ack notifications failed', error);
-    }
-  };
-
-  const scheduleAutoRefresh = async () => {
-    if (autoRefreshScheduled) {
-      return;
-    }
-    if (document.visibilityState !== 'visible') {
-      return;
-    }
-    if (isUserTyping()) {
-      return;
-    }
-
-    autoRefreshScheduled = true;
-    await acknowledgeNotifications();
-    setTimeout(() => {
-      window.location.reload();
-    }, 800);
-  };
-
-  const renderNotifications = (items, markRead = false) => {
-    updateBadge(items.length);
+  const renderNotifications = (items, unreadCount = 0) => {
+    updateBadge(unreadCount);
+    notifyList.innerHTML = '';
 
     if (!items.length) {
       notifyEmpty.style.display = 'block';
@@ -225,13 +202,11 @@ if (notifyToggle && notifyPanel && notifyList && notifyEmpty && notifyBadge) {
     notifyEmpty.style.display = 'none';
 
     for (const item of items) {
-      if (renderedIds.has(item.id)) {
-        continue;
-      }
-      renderedIds.add(item.id);
-
       const row = document.createElement('div');
       row.className = 'list-item block';
+      if (item.is_read) {
+        row.classList.add('is-read');
+      }
 
       const wrapper = document.createElement('div');
       const label = document.createElement('p');
@@ -244,7 +219,7 @@ if (notifyToggle && notifyPanel && notifyList && notifyEmpty && notifyBadge) {
       wrapper.appendChild(label);
       wrapper.appendChild(time);
       row.appendChild(wrapper);
-      notifyList.prepend(row);
+      notifyList.appendChild(row);
 
       if (swRegistration && 'Notification' in window && Notification.permission === 'granted') {
         swRegistration.showNotification(document.title.replace(/\s-\s.*/, ''), {
@@ -256,10 +231,6 @@ if (notifyToggle && notifyPanel && notifyList && notifyEmpty && notifyBadge) {
         });
       }
     }
-
-    if (!markRead) {
-      scheduleAutoRefresh();
-    }
   };
 
   const fetchNotifications = async (markRead = false) => {
@@ -269,10 +240,7 @@ if (notifyToggle && notifyPanel && notifyList && notifyEmpty && notifyBadge) {
       if (!response.ok) return;
       const data = await response.json();
       if (Array.isArray(data.items)) {
-        renderNotifications(data.items, markRead);
-        if (markRead) {
-          updateBadge(0);
-        }
+        renderNotifications(data.items, Number(data.unreadCount || 0));
       }
     } catch (error) {
       console.debug('notifications unavailable', error);
@@ -280,5 +248,8 @@ if (notifyToggle && notifyPanel && notifyList && notifyEmpty && notifyBadge) {
   };
 
   fetchNotifications();
+  if ('Notification' in window && Notification.permission === 'granted') {
+    setupWebPushSubscription();
+  }
   setInterval(fetchNotifications, 15000);
 }

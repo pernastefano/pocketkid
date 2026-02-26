@@ -19,6 +19,7 @@
   "family_wallet": "Family virtual wallet",
   "username": "Username",
   "password": "Password",
+  "remember_me": "Remember me",
   "sign_in": "Sign in",
   "dashboard_parent": "Parent dashboard",
   "dashboard_child": "Child dashboard",

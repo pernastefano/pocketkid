@@ -12,6 +12,10 @@
     <label>{{ _('password') }}
       <input type="password" name="password" required autocomplete="current-password">
     </label>
+    <label class="checkbox-label">
+      <input type="checkbox" name="remember_me" value="1" checked>
+      <span>{{ _('remember_me') }}</span>
+    </label>
     <button class="btn" type="submit">{{ _('sign_in') }}</button>
   </form>
 </section>
