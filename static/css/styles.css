@@ -414,6 +414,10 @@ select {
   color: #14532d;
 }
 
+.error-text {
+  color: #c62828;
+}
+
 .demo-box {
   margin-top: 12px;
   padding: 12px;

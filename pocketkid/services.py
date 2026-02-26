@@ -18,6 +18,7 @@ from .models import Notification, PushSubscription, RecurringMovement, Transacti
 
 
 logger = logging.getLogger("pocketkid.push")
+PUSH_RUNTIME_DISABLED = False
 
 
 def load_vapid_keys() -> tuple[str, str]:
@@ -183,6 +184,11 @@ def register_transaction(*, child_id: int, kind: str, amount: Decimal, descripti
 
 
 def send_web_push_notification(*, user_id: int, title: str, message: str, url: str = "/dashboard"):
+    global PUSH_RUNTIME_DISABLED
+
+    if PUSH_RUNTIME_DISABLED:
+        return
+
     subscriptions = PushSubscription.query.filter_by(user_id=user_id, is_active=True).all()
     if not subscriptions:
         return
@@ -206,6 +212,13 @@ def send_web_push_notification(*, user_id: int, title: str, message: str, url: s
             if status_code in {404, 410}:
                 sub.is_active = False
             logger.warning("Push delivery failed for user_id=%s status=%s error=%s", user_id, status_code, exc)
+        except Exception as exc:
+            PUSH_RUNTIME_DISABLED = True
+            logger.exception(
+                "Push disabled for current process due to unrecoverable VAPID/config error: %s",
+                exc,
+            )
+            return
 
 
 def create_notification(*, user_id: int, kind: str, message: str):

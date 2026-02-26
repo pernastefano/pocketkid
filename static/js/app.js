@@ -1,6 +1,6 @@
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/static/sw.js');
+    navigator.serviceWorker.register('/sw.js');
   });
 }
 
@@ -19,8 +19,40 @@ const base64ToUint8Array = (base64String) => {
   return Uint8Array.from([...rawData].map((ch) => ch.charCodeAt(0)));
 };
 
+const uint8ArrayToBase64Url = (buffer) => {
+  if (!buffer) {
+    return '';
+  }
+
+  const bytes = new Uint8Array(buffer);
+  let binary = '';
+  for (const byte of bytes) {
+    binary += String.fromCharCode(byte);
+  }
+
+  return window.btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '');
+};
+
+const serializePushSubscription = (subscription) => {
+  const json = subscription && subscription.toJSON ? subscription.toJSON() : {};
+  const p256dh = (json.keys && json.keys.p256dh) || uint8ArrayToBase64Url(subscription.getKey && subscription.getKey('p256dh'));
+  const auth = (json.keys && json.keys.auth) || uint8ArrayToBase64Url(subscription.getKey && subscription.getKey('auth'));
+
+  return {
+    endpoint: json.endpoint || subscription.endpoint,
+    keys: {
+      p256dh,
+      auth
+    }
+  };
+};
+
 const setupWebPushSubscription = async () => {
   if (!swRegistration || !('PushManager' in window) || !('Notification' in window)) {
+    return;
+  }
+  if (!window.isSecureContext) {
+    console.debug('push subscription unavailable: insecure context');
     return;
   }
 
@@ -46,12 +78,16 @@ const setupWebPushSubscription = async () => {
       });
     }
 
-    await fetch('/api/push/subscribe', {
+    const subscribeResponse = await fetch('/api/push/subscribe', {
       method: 'POST',
       credentials: 'same-origin',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(subscription.toJSON())
+      body: JSON.stringify(serializePushSubscription(subscription))
     });
+    if (!subscribeResponse.ok) {
+      const responseText = await subscribeResponse.text();
+      throw new Error(`push subscribe failed: ${subscribeResponse.status} ${responseText}`);
+    }
   } catch (error) {
     console.debug('push subscription unavailable', error);
   }
@@ -72,6 +108,27 @@ const ensurePushPermissionAndSubscribe = async () => {
     await setupWebPushSubscription();
   } catch (error) {
     console.debug('push permission unavailable', error);
+  }
+};
+
+const ensureServerPushSubscription = async () => {
+  if (!swRegistration || !('Notification' in window) || Notification.permission !== 'granted') {
+    return;
+  }
+
+  try {
+    const response = await fetch('/api/push/debug', { credentials: 'same-origin' });
+    if (!response.ok) {
+      return;
+    }
+
+    const data = await response.json();
+    const active = Number(data.activeSubscriptions || 0);
+    if (active === 0) {
+      await setupWebPushSubscription();
+    }
+  } catch (error) {
+    console.debug('push debug unavailable', error);
   }
 };
 
@@ -256,21 +313,8 @@ if (notifyToggle && notifyPanel && notifyList && notifyEmpty && notifyBadge) {
       row.appendChild(wrapper);
       notifyList.appendChild(row);
 
-      if (
-        swRegistration &&
-        'Notification' in window &&
-        Notification.permission === 'granted' &&
-        !item.is_read &&
-        !shownNotificationIds.has(item.id)
-      ) {
+      if (!item.is_read && !shownNotificationIds.has(item.id)) {
         shownNotificationIds.add(item.id);
-        swRegistration.showNotification(document.title.replace(/\s-\s.*/, ''), {
-          body: item.message,
-          tag: `pocketkid-${item.id}`,
-          renotify: false,
-          icon: '/static/icons/logo-192.png',
-          badge: '/static/icons/logo-192.png'
-        });
       }
     }
 
@@ -322,9 +366,47 @@ if (notifyToggle && notifyPanel && notifyList && notifyEmpty && notifyBadge) {
   if ('Notification' in window) {
     if (Notification.permission === 'granted') {
       setupWebPushSubscription();
+      ensureServerPushSubscription();
     } else if (Notification.permission === 'default') {
       bindFirstInteractionPushPrompt();
     }
   }
   setInterval(fetchNotifications, 15000);
+  setInterval(ensureServerPushSubscription, 45000);
+}
+
+const pushRegisterButton = document.getElementById('push-register-btn');
+const pushRegisterStatus = document.getElementById('push-register-status');
+
+if (pushRegisterButton && pushRegisterStatus) {
+  const setStatus = (message, isError = false) => {
+    pushRegisterStatus.textContent = message;
+    pushRegisterStatus.classList.toggle('error-text', isError);
+  };
+
+  pushRegisterButton.addEventListener('click', async () => {
+    pushRegisterButton.disabled = true;
+    setStatus('Checking push registration...');
+
+    try {
+      await ensurePushPermissionAndSubscribe();
+      const response = await fetch('/api/push/debug', { credentials: 'same-origin' });
+      if (!response.ok) {
+        throw new Error('debug endpoint unavailable');
+      }
+
+      const data = await response.json();
+      const active = Number(data.activeSubscriptions || 0);
+      if (active > 0) {
+        setStatus(`Push active (${active} subscription${active > 1 ? 's' : ''})`);
+      } else {
+        setStatus('Push not active yet. Ensure HTTPS + PWA install + notification permission.', true);
+      }
+    } catch (error) {
+      setStatus('Push registration failed. Check browser/device permissions.', true);
+      console.debug('manual push registration failed', error);
+    } finally {
+      pushRegisterButton.disabled = false;
+    }
+  });
 }

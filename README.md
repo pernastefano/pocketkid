@@ -203,6 +203,105 @@ PocketKid reads VAPID keys from environment variables:
 
 For Docker, set these in `.env` and load them via `--env-file` or Docker Compose.
 
+### Generate VAPID keys (recommended)
+
+Run from the project root after creating the virtual environment:
+
+```bash
+source .venv/bin/activate
+python - <<'PY'
+import base64
+from py_vapid import Vapid
+from cryptography.hazmat.primitives.serialization import Encoding, PublicFormat
+
+v = Vapid()
+v.generate_keys()
+
+public_bytes = v.public_key.public_bytes(
+  encoding=Encoding.X962,
+  format=PublicFormat.UncompressedPoint,
+)
+public_key = base64.urlsafe_b64encode(public_bytes).decode().rstrip('=')
+private_key = v.private_pem().decode('utf-8').replace('\n', '\\n')
+
+print(f"VAPID_PUBLIC_KEY={public_key}")
+print(f"VAPID_PRIVATE_KEY={private_key}")
+print("VAPID_SUBJECT=mailto:pocketkid@example.com")
+PY
+```
+
+Copy the output lines into your `.env` file.
+
+### Alternative: generate PEM files with `py_vapid` CLI
+
+```bash
+source .venv/bin/activate
+python -m py_vapid --gen
+python -m py_vapid --applicationServerKey -k private_key.pem
+```
+
+- Use the `Application Server Key` value as `VAPID_PUBLIC_KEY`.
+- Put the full PEM private key into `VAPID_PRIVATE_KEY` using escaped newlines (`\n`), or encode it to base64 and use `VAPID_PRIVATE_KEY_B64`.
+
+### Generate VAPID keys when running with Docker
+
+You can generate keys inside the same Docker image used by the app.
+
+```bash
+docker compose run --rm pocketkid python - <<'PY'
+import base64
+from py_vapid import Vapid
+from cryptography.hazmat.primitives.serialization import Encoding, PublicFormat
+
+v = Vapid()
+v.generate_keys()
+
+public_bytes = v.public_key.public_bytes(
+  encoding=Encoding.X962,
+  format=PublicFormat.UncompressedPoint,
+)
+public_key = base64.urlsafe_b64encode(public_bytes).decode().rstrip('=')
+private_key = v.private_pem().decode('utf-8').replace('\n', '\\n')
+
+print(f"VAPID_PUBLIC_KEY={public_key}")
+print(f"VAPID_PRIVATE_KEY={private_key}")
+print("VAPID_SUBJECT=mailto:pocketkid@example.com")
+PY
+```
+
+Then paste these lines into `.env` and restart:
+
+```bash
+docker compose up -d --build
+```
+
+### Local helper script
+
+PocketKid includes a helper script to generate `.env`-ready VAPID values:
+
+```bash
+source .venv/bin/activate
+python scripts/generate_vapid.py
+```
+
+Optional subject:
+
+```bash
+python scripts/generate_vapid.py --subject mailto:admin@example.com
+```
+
+Write directly to `.env`:
+
+```bash
+python scripts/generate_vapid.py --write-env
+```
+
+Custom env file:
+
+```bash
+python scripts/generate_vapid.py --write-env --env-file .env.production
+```
+
 ---
 
 # 6. Install PWA on iOS and Android

@@ -41,4 +41,12 @@
     <a class="btn btn-secondary" href="{{ app_repo_url }}" target="_blank" rel="noopener noreferrer">{{ _('app_repo_label') }}</a>
   </div>
 </section>
+
+<section class="card">
+  <h2>{{ _('push_diagnostics') }}</h2>
+  <div class="stack">
+    <button id="push-register-btn" class="btn" type="button">{{ _('push_register_now') }}</button>
+    <p id="push-register-status" class="muted">{{ _('push_register_hint') }}</p>
+  </div>
+</section>
 {% endblock %}

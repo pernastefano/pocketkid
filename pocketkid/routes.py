@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from datetime import UTC, datetime
 from decimal import Decimal
+import logging
+from secrets import token_hex
 
 from flask import flash, redirect, render_template, request, session, url_for
 from sqlalchemy.exc import SQLAlchemyError
@@ -37,6 +39,13 @@ from .services import (
 
 def register_routes(app):
     PAGE_SIZE = 10
+    logger = logging.getLogger("pocketkid.push")
+
+    @app.route("/sw.js")
+    def service_worker_file():
+        response = app.send_static_file("sw.js")
+        response.headers["Cache-Control"] = "no-cache"
+        return response
 
     def safe_page(param_name: str) -> int:
         page = request.args.get(param_name, 1, type=int)
@@ -812,6 +821,62 @@ def register_routes(app):
     def push_public_key():
         return {"publicKey": VAPID_PUBLIC_KEY}
 
+    @app.route("/api/push/debug", methods=["GET"])
+    @login_required()
+    def push_debug():
+        user = current_user()
+        subscriptions = (
+            PushSubscription.query.filter_by(user_id=user.id)
+            .order_by(PushSubscription.created_at.desc())
+            .limit(PAGE_SIZE)
+            .all()
+        )
+
+        return {
+            "userId": user.id,
+            "vapidConfigured": bool(VAPID_PUBLIC_KEY),
+            "activeSubscriptions": PushSubscription.query.filter_by(user_id=user.id, is_active=True).count(),
+            "totalSubscriptions": PushSubscription.query.filter_by(user_id=user.id).count(),
+            "subscriptions": [
+                {
+                    "id": sub.id,
+                    "isActive": sub.is_active,
+                    "createdAt": normalize_dt(sub.created_at).strftime("%d/%m/%Y %H:%M"),
+                    "lastSeenAt": normalize_dt(sub.last_seen_at).strftime("%d/%m/%Y %H:%M"),
+                    "endpointPreview": f"{sub.endpoint[:80]}..." if len(sub.endpoint) > 80 else sub.endpoint,
+                }
+                for sub in subscriptions
+            ],
+        }
+
+    @app.route("/api/push/debug/test", methods=["POST"])
+    @login_required()
+    def push_debug_test():
+        user = current_user()
+        active_subscriptions = PushSubscription.query.filter_by(user_id=user.id, is_active=True).count()
+
+        if active_subscriptions == 0:
+            return {
+                "ok": False,
+                "error": "no_active_subscriptions",
+                "message": "No active push subscriptions for current user.",
+            }, 400
+
+        marker = token_hex(4)
+        create_notification(
+            user_id=user.id,
+            kind="push_test",
+            message=f"Push test ({marker})",
+        )
+        db.session.commit()
+
+        return {
+            "ok": True,
+            "message": "Push test notification queued.",
+            "marker": marker,
+            "activeSubscriptions": active_subscriptions,
+        }
+
     @app.route("/api/push/subscribe", methods=["POST"])
     @login_required()
     def push_subscribe():
@@ -820,10 +885,18 @@ def register_routes(app):
 
         endpoint = payload.get("endpoint")
         keys = payload.get("keys") or {}
-        p256dh = keys.get("p256dh")
-        auth = keys.get("auth")
+        p256dh = keys.get("p256dh") or payload.get("p256dh")
+        auth = keys.get("auth") or payload.get("auth")
 
         if not endpoint or not p256dh or not auth:
+            logger.warning(
+                "Invalid push subscription payload user_id=%s endpoint=%s p256dh=%s auth=%s keys=%s",
+                user.id,
+                bool(endpoint),
+                bool(p256dh),
+                bool(auth),
+                list(keys.keys()) if isinstance(keys, dict) else [],
+            )
             return {"ok": False, "error": "invalid_subscription"}, 400
 
         subscription = PushSubscription.query.filter_by(endpoint=endpoint).first()
