@@ -95,14 +95,8 @@ self.addEventListener('push', (event) => {
 
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windowClients) => {
-      const hasFocusedWindow = windowClients.some((client) => client.visibilityState === 'visible');
-
       for (const client of windowClients) {
         client.postMessage({ type: 'PUSH_EVENT', payload });
-      }
-
-      if (hasFocusedWindow) {
-        return undefined;
       }
 
       return self.registration.showNotification(payload.title || 'PocketKid', {

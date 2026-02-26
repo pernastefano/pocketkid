@@ -212,13 +212,19 @@ def send_web_push_notification(*, user_id: int, title: str, message: str, url: s
             if status_code in {404, 410}:
                 sub.is_active = False
             logger.warning("Push delivery failed for user_id=%s status=%s error=%s", user_id, status_code, exc)
-        except Exception as exc:
+        except ValueError as exc:
             PUSH_RUNTIME_DISABLED = True
             logger.exception(
-                "Push disabled for current process due to unrecoverable VAPID/config error: %s",
+                "Push disabled for current process due to invalid VAPID key format: %s",
                 exc,
             )
             return
+        except Exception as exc:
+            logger.exception("Unexpected push send error for user_id=%s: %s", user_id, exc)
+
+
+def is_push_runtime_disabled() -> bool:
+    return PUSH_RUNTIME_DISABLED
 
 
 def create_notification(*, user_id: int, kind: str, message: str):

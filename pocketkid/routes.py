@@ -22,6 +22,7 @@ from .models import (
     Wallet,
 )
 from .services import (
+    is_push_runtime_disabled,
     VAPID_PUBLIC_KEY,
     capitalize_name,
     create_notification,
@@ -835,6 +836,7 @@ def register_routes(app):
         return {
             "userId": user.id,
             "vapidConfigured": bool(VAPID_PUBLIC_KEY),
+            "pushRuntimeDisabled": is_push_runtime_disabled(),
             "activeSubscriptions": PushSubscription.query.filter_by(user_id=user.id, is_active=True).count(),
             "totalSubscriptions": PushSubscription.query.filter_by(user_id=user.id).count(),
             "subscriptions": [
