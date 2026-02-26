@@ -43,10 +43,14 @@
 </section>
 
 <section class="card">
-  <h2>{{ _('push_diagnostics') }}</h2>
+  <h2>{{ _('push_notifications_title') }}</h2>
   <div class="stack">
-    <button id="push-register-btn" class="btn" type="button">{{ _('push_register_now') }}</button>
-    <p id="push-register-status" class="muted">{{ _('push_register_hint') }}</p>
+    <p class="muted">{{ _('push_notifications_desc') }}</p>
+    <button id="push-toggle-btn" class="btn" type="button">{{ _('push_toggle_btn') }}</button>
+    <p id="push-register-status" class="muted">{{ _('push_status_checking') }}</p>
+    <hr>
+    <button id="push-register-btn" class="btn btn-secondary" type="button">{{ _('push_register_now') }}</button>
+    <p class="muted small">{{ _('push_register_hint') }}</p>
   </div>
 </section>
 {% endblock %}

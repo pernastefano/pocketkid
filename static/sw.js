@@ -1,4 +1,4 @@
-const CACHE_NAME = 'pocketkid-v3';
+const CACHE_NAME = 'pocketkid-v4';
 const URLS_TO_CACHE = [
   '/static/css/styles.css',
   '/static/js/app.js',
@@ -93,19 +93,29 @@ self.addEventListener('push', (event) => {
     }
   }
 
+  const showNotification = () => {
+    return self.registration.showNotification(payload.title || 'PocketKid', {
+      body: payload.body || '',
+      icon: '/static/icons/logo-192.png',
+      badge: '/static/icons/logo-192.png',
+      tag: `push-${Date.now()}`,
+      data: { url: payload.url || '/dashboard' },
+      requireInteraction: false,
+      vibrate: [200, 100, 200]
+    });
+  };
+
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windowClients) => {
+      // Always show notification for reliability across all platforms
+      // Send message to open windows for real-time UI updates
       for (const client of windowClients) {
-        client.postMessage({ type: 'PUSH_EVENT', payload });
+        if (client.visibilityState === 'visible') {
+          client.postMessage({ type: 'PUSH_EVENT', payload });
+        }
       }
-
-      return self.registration.showNotification(payload.title || 'PocketKid', {
-        body: payload.body || '',
-        icon: '/static/icons/logo-192.png',
-        badge: '/static/icons/logo-192.png',
-        tag: `push-${Date.now()}`,
-        data: { url: payload.url || '/dashboard' }
-      });
+      
+      return showNotification();
     })
   );
 });
