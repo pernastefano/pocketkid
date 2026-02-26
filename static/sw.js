@@ -108,11 +108,9 @@ self.addEventListener('push', (event) => {
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windowClients) => {
       // Always show notification for reliability across all platforms
-      // Send message to open windows for real-time UI updates
+      // Send message to all open windows for real-time UI updates
       for (const client of windowClients) {
-        if (client.visibilityState === 'visible') {
-          client.postMessage({ type: 'PUSH_EVENT', payload });
-        }
+        client.postMessage({ type: 'PUSH_EVENT', payload });
       }
       
       return showNotification();

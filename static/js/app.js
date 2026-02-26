@@ -24,7 +24,10 @@ const setPushPreference = (value) => {
 
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js').catch((err) => {
+    navigator.serviceWorker.register('/sw.js').then((registration) => {
+      // Check for updates to the service worker
+      registration.update();
+    }).catch((err) => {
       console.debug('Service worker registration failed', err);
     });
   });
@@ -36,6 +39,10 @@ if ('serviceWorker' in navigator) {
     swRegistration = registration;
     // Auto-setup if user has already granted permission
     if ('Notification' in window && Notification.permission === 'granted') {
+      // If user granted permission but preference is unset, set it to enabled
+      if (getPushPreference() === PUSH_PREF_UNSET) {
+        setPushPreference(PUSH_PREF_ENABLED);
+      }
       setupWebPushSubscription();
     }
   });
