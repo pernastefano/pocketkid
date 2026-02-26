@@ -190,7 +190,23 @@ const notifyEmpty = document.getElementById('notify-empty');
 const notifyBadge = document.getElementById('notify-badge');
 
 if (notifyToggle && notifyPanel && notifyList && notifyEmpty && notifyBadge) {
-  let previousUnreadCount = 0;
+  let fetchSequence = 0;
+  let latestAppliedSequence = 0;
+  const shownNotificationIds = new Set();
+  const lastSeenStorageKey = 'pk_last_seen_notification_id';
+
+  const getLastSeenNotificationId = () => {
+    const raw = window.sessionStorage.getItem(lastSeenStorageKey);
+    const parsed = Number(raw || 0);
+    return Number.isFinite(parsed) ? parsed : 0;
+  };
+
+  const setLastSeenNotificationId = (id) => {
+    if (!Number.isFinite(id) || id <= 0) {
+      return;
+    }
+    window.sessionStorage.setItem(lastSeenStorageKey, String(id));
+  };
 
   const updateBadge = (count) => {
     notifyBadge.textContent = String(count);
@@ -240,7 +256,14 @@ if (notifyToggle && notifyPanel && notifyList && notifyEmpty && notifyBadge) {
       row.appendChild(wrapper);
       notifyList.appendChild(row);
 
-      if (swRegistration && 'Notification' in window && Notification.permission === 'granted') {
+      if (
+        swRegistration &&
+        'Notification' in window &&
+        Notification.permission === 'granted' &&
+        !item.is_read &&
+        !shownNotificationIds.has(item.id)
+      ) {
+        shownNotificationIds.add(item.id);
         swRegistration.showNotification(document.title.replace(/\s-\s.*/, ''), {
           body: item.message,
           tag: `pocketkid-${item.id}`,
@@ -251,23 +274,42 @@ if (notifyToggle && notifyPanel && notifyList && notifyEmpty && notifyBadge) {
       }
     }
 
+    const latestId = Number(items[0] && items[0].id ? items[0].id : 0);
     const isDashboardView = window.location.pathname === '/dashboard';
     const panelHidden = notifyPanel.classList.contains('hidden');
-    if (isDashboardView && panelHidden && unreadCount > previousUnreadCount && document.visibilityState === 'visible') {
+    const lastSeenId = getLastSeenNotificationId();
+
+    if (
+      isDashboardView &&
+      panelHidden &&
+      document.visibilityState === 'visible' &&
+      latestId > lastSeenId &&
+      unreadCount > 0
+    ) {
+      setLastSeenNotificationId(latestId);
       setTimeout(() => {
         window.location.reload();
       }, 500);
+      return;
     }
 
-    previousUnreadCount = unreadCount;
+    if (latestId > 0) {
+      setLastSeenNotificationId(latestId);
+    }
   };
 
   const fetchNotifications = async (markRead = false) => {
+    const sequence = ++fetchSequence;
+
     try {
       const url = markRead ? '/api/notifications?mark_read=1' : '/api/notifications';
       const response = await fetch(url, { credentials: 'same-origin' });
       if (!response.ok) return;
       const data = await response.json();
+      if (sequence < latestAppliedSequence) {
+        return;
+      }
+      latestAppliedSequence = sequence;
       if (Array.isArray(data.items)) {
         renderNotifications(data.items, Number(data.unreadCount || 0));
       }
