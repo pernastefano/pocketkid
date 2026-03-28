@@ -1,4 +1,6 @@
-# 1. PocketKid
+# PocketKid
+
+# 1. Introduction
 
 PocketKid is a mobile-first Python PWA to manage a virtual wallet for your children.
 It helps parents organize pocket money through configurable challenges and a complete request approval flow.
