@@ -1,6 +1,6 @@
 # PocketKid
 
-# 1. Introduction
+# Introduction
 
 PocketKid is a mobile-first Python PWA to manage a virtual wallet for your children.
 It helps parents organize pocket money through configurable challenges and a complete request approval flow.
@@ -29,7 +29,7 @@ The app is installable as a Progressive Web App (PWA) and supports real Web Push
 
 ---
 
-# 2. Stack
+# Stack
 
 PocketKid uses a simple, production-friendly stack:
 
@@ -58,7 +58,7 @@ PocketKid uses a simple, production-friendly stack:
 
 ---
 
-# 3a. Local Run
+# Local Run
 
 ## Prerequisites
 - Python 3.12+
@@ -84,7 +84,7 @@ Open:
 
 ---
 
-# 3b. Run with Docker
+# Run with Docker
 
 ## Build image
 ```bash
@@ -112,7 +112,7 @@ Open:
 
 ---
 
-# 3c. Run with Docker Compose
+# Run with Docker Compose
 
 Prepare env file first:
 ```bash
@@ -135,7 +135,7 @@ The default compose file:
 
 ---
 
-# 4. Main Features and How It Works
+# Main Features and How It Works
 
 ## Roles
 
@@ -180,7 +180,7 @@ The default compose file:
 
 ---
 
-# 5. SSL Configuration
+# SSL Configuration
 
 HTTPS is required for full PWA + Push behavior in real devices/environments (except localhost during development).
 
@@ -306,7 +306,7 @@ python scripts/generate_vapid.py --write-env --env-file .env.production
 
 ---
 
-# 6. Install PWA on iOS and Android
+# Install PWA on iOS and Android
 
 ## iOS (Safari)
 1. Open the app URL in Safari.
